@@ -21,6 +21,7 @@ async def process_gif(gif_path):
                 for i in result:
                     if i.get("label") == "nsfw":
                         score = i.get("score")
+                        print(score)
                         if score >= 0.7:
                             nsfw_found = True
                             break
@@ -42,4 +43,4 @@ except OSError:
     print("File is not a valid image.")
 
 # Check GIF
-asyncio.run(process_gif("./images/gif_2.gif"))
+asyncio.run(process_gif("./images/gif_3.gif"))
