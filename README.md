@@ -8,5 +8,5 @@
 
 ---
 
-_Notice:_ _This package was initally created to be used in-house, as such the
+_Notice:_ _This project was initally created to be used in-house, as such the
 development is first and foremost aligned with the internal requirements._
