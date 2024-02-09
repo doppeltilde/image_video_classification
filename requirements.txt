@@ -1,5 +1,4 @@
 Flask==3.0.2
 Pillow==10.2.0
 transformers==4.36.2
-tensorflow
 torch
