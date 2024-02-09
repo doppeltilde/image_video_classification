@@ -27,7 +27,6 @@ jobs:
               with:
                 images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-            - uses: docker/setup-buildx-actions@v3
             - uses: docker/login-action@v3
               with:
                 registry: ${{ env.REGISTRY }}
