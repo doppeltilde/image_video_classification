@@ -1,13 +1,13 @@
 name: ghcr.io CI/CD
 
 on:
-    push:
-        tags:
-        - '*'
+  push:
+    tags:
+      - 'v*'
     
 env:
-    REGISTRY: ghcr.io
-    IMAGE_NAME: ${{ github.repository }}
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
     build_and_publish:
