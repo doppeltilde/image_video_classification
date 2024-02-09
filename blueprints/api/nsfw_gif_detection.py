@@ -1,22 +1,27 @@
 import asyncio
 from PIL import Image
-from flask import Blueprint, render_template, redirect
+from flask import Blueprint, render_template, jsonify, request
 from transformers import pipeline
 import os
 
 nsfwgif = Blueprint("nsfwgif", __name__, template_folder="templates")
 
 
-@nsfwgif.route("/api/nsfw-gif-detection/")
+@nsfwgif.route("/api/nsfw-gif-detection/", methods=["POST"])
 def app():
+    image = request.get_json()["image"]
+
     classifier = pipeline(
         "image-classification", model="Falconsai/nsfw_image_detection"
     )
 
-    async def process_gif(gif_path):
+    if not os.path.exists("./model"):
+        classifier.save_pretrained("./model")
+
+    async def process_gif(img):
         loop = asyncio.get_running_loop()
 
-        with open(gif_path, "rb") as f:
+        with open(img, "rb") as f:
             gif = await loop.run_in_executor(None, Image.open, f)
 
             try:
@@ -41,6 +46,6 @@ def app():
         classifier.save_pretrained("./model")
 
     # Check GIF
-    asyncio.run(process_gif("./static/gif_4.gif"))
+    asyncio.run(process_gif(image))
 
     return render_template("index.html")
