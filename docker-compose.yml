@@ -1,7 +1,7 @@
 version: '3'
 services:
   nsfw_image_detection:
-    image: ghcr.io/tiltedcube/image_detection:latest
+    image: ghcr.io/tiltedcube/image_classification:latest
     ports:
       - "8000:8000"
     volumes:

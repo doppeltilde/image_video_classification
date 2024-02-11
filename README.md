@@ -1,4 +1,4 @@
-# NSFW & SFW Image Clasification
+# NSFW & SFW Image Classification
 
 ## Stack:
 - [FastAPI](https://fastapi.tiangolo.com)
