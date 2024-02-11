@@ -3,5 +3,4 @@ Pillow==10.2.0
 uvicorn
 python-multipart
 transformers==4.36.2
---index-url https://download.pytorch.org/whl/cpu/torch_stable.html
 torch==2.2.0+cpu
