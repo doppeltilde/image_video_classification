@@ -1,6 +1,8 @@
 version: '3'
 services:
-  falconsai_nsfw_image_detection:
+  nsfw_image_detection:
     image: ghcr.io/tiltedcube/falconsai_nsfw_image_detection:latest
     ports:
-      - "9900:9900"
+      - "8000:8000"
+    volumes:
+        - ./model:/app/model:rw

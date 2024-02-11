@@ -1,18 +1,22 @@
 # WIP & EXPERIMENTAL!
 
 ## Stack:
-- Flask Framework
-- Python
+- [FastAPI](https://fastapi.tiangolo.com)
+- [Python](https://www.python.org)
 - https://huggingface.co/Falconsai/nsfw_image_detection
 
 ## Usage:
+
+Interactive API documentation can be found at: http://localhost:8000/docs
+
 ### Image Classification
-Takes a base64 string.
+`POST` request to the `/api/image-classification/` endpoint, uploading an image located at file path.
 ```
 curl -X POST \
-     -H "Content-Type: application/json" \
-     -d '{"image":""}' \
-     http://localhost:9900/api/nsfw-image-detection
+    -H "Content-Type: multipart/form-data" \
+    -F "file=@file.jpg" \
+    http://localhost:8000/api/image-classification/
+
 ```
 Returns a json array.
 ```json
