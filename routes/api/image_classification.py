@@ -12,14 +12,18 @@ router = APIRouter()
 load_dotenv()
 
 model_name = os.getenv("MODEL_NAME", "Falconsai/nsfw_image_detection")
+model_directory = f"./models/{model_name}"
 
 
 @router.post("/api/image-classification/")
 async def nsfw_image_detection(file: UploadFile = File()):
     classifier = pipeline("image-classification", model=model_name)
 
-    if not os.listdir(f"./models/{model_name}"):
-        classifier.save_pretrained(f"./models/{model_name}")
+    if not os.path.exists(model_directory):
+        os.makedirs(model_directory, exist_ok=True)
+
+    if not os.listdir(model_directory):
+        classifier.save_pretrained(model_directory)
 
     try:
         # Read the file as bytes
