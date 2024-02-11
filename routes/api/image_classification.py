@@ -11,7 +11,7 @@ router = APIRouter()
 
 load_dotenv()
 
-model_name = os.getenv("MODEL_NAME")
+model_name = os.getenv("MODEL_NAME", "Falconsai/nsfw_image_detection")
 
 
 @router.post("/api/image-classification/")
