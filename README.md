@@ -1,9 +1,17 @@
-# WIP & EXPERIMENTAL!
+# NSFW & SFW Image Clasification
 
 ## Stack:
 - [FastAPI](https://fastapi.tiangolo.com)
 - [Python](https://www.python.org)
+
+## Example Models:
 - https://huggingface.co/Falconsai/nsfw_image_detection
+- https://huggingface.co/LukeJacob2023/nsfw-image-detector
+- https://huggingface.co/nateraw/vit-age-classifier
+
+## Install:
+For ease of use it's recommended to use the provided [docker-compose.yml](https://github.com/tiltedcube/image_classification/blob/main/docker-compose.yml).
+Rename the `.env.example` file to `.env` and set the preferred values.
 
 ## Usage:
 
@@ -18,7 +26,7 @@ curl -X POST \
     http://localhost:8000/api/image-classification/
 
 ```
-Returns a json array.
+Example returned json array for`Falconsai/Falconsai/nsfw_image_detection`:
 ```json
 [
 	{

@@ -5,4 +5,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-        - ./model:/app/model:rw
+        - ./models:/app/models:rw
+    environment:
+      - MODEL_NAME
+      - SCORE

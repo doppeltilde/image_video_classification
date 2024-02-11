@@ -4,3 +4,4 @@ uvicorn
 python-multipart
 transformers==4.36.2
 torch==2.2.0
+python-dotenv
