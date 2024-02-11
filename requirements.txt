@@ -1,4 +1,5 @@
 fastapi==0.109.2
 uvicorn
+python-multipart
 transformers==4.36.2
 tensorflow
