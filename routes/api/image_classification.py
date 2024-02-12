@@ -5,8 +5,8 @@ import base64
 from PIL import Image
 import io
 from dotenv import load_dotenv
-import asyncio
 from typing import List
+from concurrent.futures import ThreadPoolExecutor
 
 router = APIRouter()
 
@@ -16,16 +16,17 @@ access_token = os.getenv("ACCESS_TOKEN", None)
 default_model_name = os.getenv("DEFAULT_MODEL_NAME", "Falconsai/nsfw_image_detection")
 
 
-async def classify_frame(img, i, classifier):
+def classify_frame(content, i, classifier):
+    img = Image.open(io.BytesIO(content))
     img.seek(i)
-    frame = img.copy()
-    result = classifier(frame)
+    result = classifier(img)
     print(f"Frame: {i} Result: {result}")
+    img.close()
     return result
 
 
 @router.post("/api/image-classification")
-async def nsfw_image_detection(
+async def image_detection(
     file: UploadFile = File(),
     model_name: str = Query(None),
 ):
@@ -56,12 +57,15 @@ async def nsfw_image_detection(
         # Check if the image is a GIF and if it's animated
         if img.format.lower() == "gif":
             try:
-                loop = asyncio.get_event_loop()
-                tasks = [
-                    loop.create_task(classify_frame(img, i, classifier))
-                    for i in range(img.n_frames)
-                ]
-                results = await asyncio.gather(*tasks)
+                results = []
+                with ThreadPoolExecutor() as executor:
+                    futures = [
+                        executor.submit(classify_frame, contents, i, classifier)
+                        for i in range(img.n_frames)
+                    ]
+                    for future in futures:
+                        result = future.result()
+                        results.append(result)
                 img.close()
                 return results
             except EOFError:
@@ -86,7 +90,7 @@ async def nsfw_image_detection(
 
 
 @router.post("/api/multi-image-classification")
-async def nsfw_multi_image_detection(
+async def multi_image_detection(
     files: List[UploadFile] = File(), model_name: str = Query(None)
 ):
     model_name = model_name or default_model_name
@@ -119,14 +123,17 @@ async def nsfw_multi_image_detection(
             # Check if the image is a GIF and if it's animated
             if img.format.lower() == "gif":
                 try:
-                    loop = asyncio.get_event_loop()
-                    tasks = [
-                        loop.create_task(classify_frame(img, i, classifier))
-                        for i in range(img.n_frames)
-                    ]
-                    results = await asyncio.gather(*tasks)
-                    image_list.append({index: results})
+                    results = []
+                    with ThreadPoolExecutor() as executor:
+                        futures = [
+                            executor.submit(classify_frame, contents, i, classifier)
+                            for i in range(img.n_frames)
+                        ]
+                        for future in futures:
+                            result = future.result()
+                            results.append(result)
                     img.close()
+                    return results
                 except EOFError:
                     img.close()
                     raise HTTPException(
