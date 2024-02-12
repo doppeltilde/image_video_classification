@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from transformers import pipeline
 import os
 import base64
@@ -6,14 +6,14 @@ from PIL import Image
 import io
 from dotenv import load_dotenv
 import asyncio
+from typing import List
 
 router = APIRouter()
 
 load_dotenv()
 
 access_token = os.getenv("ACCESS_TOKEN", None)
-model_name = os.getenv("MODEL_NAME", "Falconsai/nsfw_image_detection")
-model_directory = f"./models/{model_name}"
+default_model_name = os.getenv("DEFAULT_MODEL_NAME", "Falconsai/nsfw_image_detection")
 
 
 async def classify_frame(img, i, classifier):
@@ -24,8 +24,13 @@ async def classify_frame(img, i, classifier):
     return result
 
 
-@router.post("/api/image-classification/")
-async def nsfw_image_detection(file: UploadFile = File()):
+@router.post("/api/image-classification")
+async def nsfw_image_detection(
+    file: UploadFile = File(),
+    model_name: str = Query(None),
+):
+    model_name = model_name or default_model_name
+    model_directory = f"./models/{model_name}"
     classifier = pipeline("image-classification", model=model_name, token=access_token)
 
     if not os.path.exists(model_directory):

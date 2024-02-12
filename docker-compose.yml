@@ -7,5 +7,5 @@ services:
     volumes:
         - ./models:/app/models:rw
     environment:
-      - MODEL_NAME
+      - DEFAULT_MODEL_NAME
       - ACCESS_TOKEN

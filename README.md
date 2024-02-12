@@ -25,7 +25,7 @@ Interactive API documentation can be found at: http://localhost:8000/docs
 curl -X POST \
     -H "Content-Type: multipart/form-data" \
     -F "file=@file.jpg" \
-    http://localhost:8000/api/image-classification/
+    http://localhost:8000/api/image-classification?model_name=Falconsai/nsfw_image_detection
 
 ```
 Example returned json array for`Falconsai/Falconsai/nsfw_image_detection`:
