@@ -131,7 +131,7 @@ async def multi_image_detection(
                         ]
                         for future in futures:
                             result = future.result()
-                            results.append(result)
+                            results.append({index: results})
                     img.close()
                     return results
                 except EOFError:
