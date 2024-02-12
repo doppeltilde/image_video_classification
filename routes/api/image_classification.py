@@ -48,6 +48,7 @@ async def nsfw_image_detection(
             img = Image.open(io.BytesIO(contents))
             img.verify()
         except IOError:
+            img.close()
             raise HTTPException(
                 status_code=400, detail="The uploaded file is not a valid image."
             )
@@ -61,8 +62,10 @@ async def nsfw_image_detection(
                     for i in range(img.n_frames)
                 ]
                 results = await asyncio.gather(*tasks)
+                img.close()
                 return results
             except EOFError:
+                img.close()
                 raise HTTPException(
                     status_code=400, detail="The uploaded GIF is not animated."
                 )
@@ -74,8 +77,10 @@ async def nsfw_image_detection(
 
             res = classifier(base64Image)
             print(res)
+            img.close()
             return res
     except Exception as e:
+        img.close()
         print("File is not a valid image.")
         return {"error": str(e)}
 
@@ -106,6 +111,7 @@ async def nsfw_multi_image_detection(
                 img = Image.open(io.BytesIO(contents))
                 img.verify()
             except IOError:
+                img.close()
                 raise HTTPException(
                     status_code=400, detail="The uploaded file is not a valid image."
                 )
@@ -120,7 +126,9 @@ async def nsfw_multi_image_detection(
                     ]
                     results = await asyncio.gather(*tasks)
                     image_list.append({index: results})
+                    img.close()
                 except EOFError:
+                    img.close()
                     raise HTTPException(
                         status_code=400, detail="The uploaded GIF is not animated."
                     )
@@ -132,8 +140,10 @@ async def nsfw_multi_image_detection(
 
                 res = classifier(base64Image)
                 image_list.append({index: res})
+                img.close()
         except Exception as e:
             print("File is not a valid image.")
+            img.close()
             return {"error": str(e)}
 
     return image_list
