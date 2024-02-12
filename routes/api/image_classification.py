@@ -4,20 +4,29 @@ import os
 import base64
 from PIL import Image
 import io
-import os
 from dotenv import load_dotenv
+import asyncio
 
 router = APIRouter()
 
 load_dotenv()
 
+access_token = os.getenv("ACCESS_TOKEN", None)
 model_name = os.getenv("MODEL_NAME", "Falconsai/nsfw_image_detection")
 model_directory = f"./models/{model_name}"
 
 
+async def classify_frame(img, i, classifier):
+    img.seek(i)
+    frame = img.copy()
+    result = classifier(frame)
+    print(f"Frame: {i} Result: {result}")
+    return result
+
+
 @router.post("/api/image-classification/")
 async def nsfw_image_detection(file: UploadFile = File()):
-    classifier = pipeline("image-classification", model=model_name)
+    classifier = pipeline("image-classification", model=model_name, token=access_token)
 
     if not os.path.exists(model_directory):
         os.makedirs(model_directory, exist_ok=True)
@@ -32,7 +41,7 @@ async def nsfw_image_detection(file: UploadFile = File()):
         # Check if the image is in fact an image
         try:
             img = Image.open(io.BytesIO(contents))
-            img.verify()  # Verify that it is, in fact, an image
+            img.verify()
         except IOError:
             raise HTTPException(
                 status_code=400, detail="The uploaded file is not a valid image."
@@ -41,10 +50,14 @@ async def nsfw_image_detection(file: UploadFile = File()):
         # Check if the image is a GIF and if it's animated
         if img.format.lower() == "gif":
             try:
-                # TODO
-                print("Image is GIF")
+                loop = asyncio.get_event_loop()
+                tasks = [
+                    loop.create_task(classify_frame(img, i, classifier))
+                    for i in range(img.n_frames)
+                ]
+                results = await asyncio.gather(*tasks)
+                return results
             except EOFError:
-                # If seeking to the next frame raises EOFError, it means the GIF has only one frame
                 raise HTTPException(
                     status_code=400, detail="The uploaded GIF is not animated."
                 )

@@ -1,6 +1,6 @@
 version: '3'
 services:
-  nsfw_image_detection:
+  image_detection:
     image: ghcr.io/tiltedcube/image_classification:latest
     ports:
       - "8000:8000"
@@ -8,4 +8,4 @@ services:
         - ./models:/app/models:rw
     environment:
       - MODEL_NAME
-      - SCORE
+      - ACCESS_TOKEN
