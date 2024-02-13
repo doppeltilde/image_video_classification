@@ -22,7 +22,7 @@ Interactive API documentation can be found at: http://localhost:8000/docs
 
 #### Image Classification
 `POST` request to the `/api/image-classification` endpoint, uploading an image located at file path.
-```
+```sh
 curl -X 'POST' \
   'http://localhost:8000/api/multi-image-classification?model_name=Falconsai/nsfw_image_detection' \
   -H 'accept: application/json' \
@@ -32,7 +32,7 @@ curl -X 'POST' \
 
 #### Multi Image Classification
 `POST` request to the `/api/multi-image-classification` endpoint.
-```
+```sh
 curl -X 'POST' \
   'http://localhost:8000/api/multi-image-classification?model_name=Falconsai/nsfw_image_detection' \
   -H 'accept: application/json' \

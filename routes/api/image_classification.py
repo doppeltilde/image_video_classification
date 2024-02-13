@@ -66,23 +66,32 @@ async def image_detection(
                     for future in futures:
                         result = future.result()
                         results.append(result)
-                img.close()
                 return results
             except EOFError:
-                img.close()
                 raise HTTPException(
                     status_code=400, detail="The uploaded GIF is not animated."
                 )
+            finally:
+                img.close()
 
         # Check Static Image
         else:
-            # Encode the file to base64
-            base64Image = base64.b64encode(contents).decode("utf-8")
+            try:
+                # Validate image data
+                if not isinstance(contents, bytes):
+                    raise ValueError("Invalid image data: not bytes")
+                # Encode the file to base64
+                base64Image = base64.b64encode(contents).decode("utf-8")
 
-            res = classifier(base64Image)
-            print(res)
-            img.close()
-            return res
+                res = classifier(base64Image)
+
+                return res
+            except (ValueError, IOError) as e:
+                raise HTTPException(
+                    status_code=400, detail=f"Error classifying image: {e}"
+                )
+            finally:
+                img.close()
     except Exception as e:
         img.close()
         print("File is not a valid image.")
@@ -131,23 +140,30 @@ async def multi_image_detection(
                         ]
                         for future in futures:
                             result = future.result()
-                            results.append({index: results})
-                    img.close()
-                    return results
+                            results.append(result)
+                    image_list.append({index: results})
                 except EOFError:
-                    img.close()
                     raise HTTPException(
                         status_code=400, detail="The uploaded GIF is not animated."
                     )
+                finally:
+                    img.close()
 
             # Check Static Image
             else:
-                # Encode the file to base64
-                base64Image = base64.b64encode(contents).decode("utf-8")
+                try:
+                    # Encode the file to base64
+                    base64Image = base64.b64encode(contents).decode("utf-8")
 
-                res = classifier(base64Image)
-                image_list.append({index: res})
-                img.close()
+                    res = classifier(base64Image)
+                    image_list.append({index: res})
+
+                except (ValueError, IOError) as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Error classifying image: {e}"
+                    )
+                finally:
+                    img.close()
         except Exception as e:
             print("File is not a valid image.")
             img.close()
