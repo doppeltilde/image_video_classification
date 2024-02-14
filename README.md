@@ -3,6 +3,7 @@
 ## Stack:
 - [FastAPI](https://fastapi.tiangolo.com)
 - [Python](https://www.python.org)
+- [Docker](https://docker.com)
 
 ## Installation
 - For ease of use it's recommended to use the provided [docker-compose.yml](https://github.com/tiltedcube/image_classification/blob/main/docker-compose.yml).

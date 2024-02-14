@@ -1,4 +1,5 @@
-version: '3'
+version: '3.9'
+
 services:
   image_classification:
     image: ghcr.io/tiltedcube/image_classification:latest
