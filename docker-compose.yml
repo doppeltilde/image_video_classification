@@ -1,6 +1,6 @@
 version: '3'
 services:
-  image_detection:
+  image_classification:
     image: ghcr.io/tiltedcube/image_classification:latest
     ports:
       - "8000:8000"
@@ -9,3 +9,4 @@ services:
     environment:
       - DEFAULT_MODEL_NAME
       - ACCESS_TOKEN
+      - DEFAULT_SCORE
