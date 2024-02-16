@@ -1,9 +1,8 @@
 fastapi==0.109.2
 uvicorn==0.27.1
 Pillow==10.2.0
-python-multipart
-transformers==4.36.2
+transformers==4.37.2
 torch==2.2.0
-python-dotenv
-filetype
-opencv-python
+python-dotenv==1.0.1
+filetype==1.2.0
+opencv-python==4.9.0.80
