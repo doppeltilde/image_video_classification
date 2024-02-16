@@ -7,6 +7,7 @@ from typing import List
 import base64
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import tempfile
 
 router = APIRouter()
 
@@ -21,21 +22,22 @@ default_model_name = os.getenv("DEFAULT_MODEL_NAME", "Falconsai/nsfw_image_detec
 def process_video(classifier, file, labels, score, return_on_first_matching_label):
     try:
         results = []
-        tempFile = f"_temp/{file.filename}"
 
-        with open(tempFile, "wb") as b:
-            b.write(file.file.read())
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            file_content = file.file.read()
+            tf.write(file_content)
 
         # Read the video file using OpenCV
-        video_capture = cv2.VideoCapture(tempFile)
+        vc = cv2.VideoCapture(tf.name)
 
         # Extract frames from the video
-        frame_count = 0
         while True:
-            success, frame = video_capture.read()
+            success, frame = vc.read()
             if not success:
                 break
 
+            index = int(vc.get(cv2.CAP_PROP_POS_FRAMES))
             _, img = cv2.imencode(".jpg", frame)
 
             base64Image = base64.b64encode(img).decode("utf-8")
@@ -49,7 +51,7 @@ def process_video(classifier, file, labels, score, return_on_first_matching_labe
                 if l in label_scores and label_scores[l] >= score:
                     results.append(
                         {
-                            "frame": frame_count,
+                            "frame": index,
                             "label": l,
                             "score": label_scores[l],
                         }
@@ -60,17 +62,16 @@ def process_video(classifier, file, labels, score, return_on_first_matching_labe
             if return_on_first_matching_label or set(labels) == m:
                 break
 
-            frame_count += 1
-
         # Release the video capture object
-        video_capture.release()
+        vc.release()
 
         # Return the results
         return results
     except Exception as e:
         return e
     finally:
-        os.remove(tempFile)
+        tf.close()
+        os.remove(tf.name)
 
 
 @router.post("/api/video-classification")
