@@ -1,4 +1,4 @@
-# NSFW & SFW Image Classification
+# Image & Video Classification for NSFW and SFW media.
 
 ## Stack:
 - [FastAPI](https://fastapi.tiangolo.com)
@@ -6,7 +6,22 @@
 - [Docker](https://docker.com)
 
 ## Installation
-- For ease of use it's recommended to use the provided [docker-compose.yml](https://github.com/tiltedcube/image_classification/blob/main/docker-compose.yml).
+- For ease of use it's recommended to use the provided [docker-compose.yml](https://github.com/tiltedcube/image_video_classification/blob/main/docker-compose.yml).
+```yml
+version: '3.9'
+services:
+  image_video_classification:
+    image: ghcr.io/tiltedcube/image_video_classification:latest
+    ports:
+      - "8000:8000"
+    volumes:
+        - models:/app/models:rw
+    environment:
+      - DEFAULT_MODEL_NAME
+      - ACCESS_TOKEN
+      - DEFAULT_SCORE
+```
+
 - Rename the `.env.example` file to `.env` and set the preferred values.
 
 ## Models
@@ -25,7 +40,7 @@ Any model designed for image classification should work.
 `POST` request to the `/api/image-classification` endpoint.
 ```sh
 curl -X 'POST' \
-  'http://localhost:8000/api/multi-image-classification?model_name=Falconsai/nsfw_image_detection' \
+  'http://localhost:8000/api/image-classification?model_name=Falconsai/nsfw_image_detection' \
   -H 'accept: application/json' \
   -H 'Content-Type: multipart/form-data' \
   -F 'file=@file.jpg'
@@ -82,7 +97,7 @@ Optional parameters:
 `POST` request to the `/api/image-query-classification` endpoint.
 ```sh
 curl -X 'POST' \
-  'http://localhost:8000/api/nsfw-image-classification?model_name=Falconsai%2Fnsfw_image_detection&labels=nsfw&score=0.7' \
+  'http://localhost:8000/api/image-query-classification?model_name=Falconsai%2Fnsfw_image_detection' \
   -H 'accept: application/json' \
   -H 'Content-Type: multipart/form-data' \
   -F 'file=@1.jpeg;type=image/jpeg'
@@ -92,7 +107,7 @@ curl -X 'POST' \
 `POST` request to the `/api/multi-image-query-classification` endpoint.
 ```sh
 curl -X 'POST' \
-  'http://localhost:8000/api/multi-image-query-classification?model_name=Falconsai%2Fnsfw_image_detection&labels=nsfw&score=0.7' \
+  'http://localhost:8000/api/multi-image-query-classification?model_name=Falconsai%2Fnsfw_image_detection' \
   -H 'accept: application/json' \
   -H 'Content-Type: multipart/form-data' \
   -F 'files=@1.png;type=image/png' \
@@ -137,6 +152,37 @@ Example returned json array for `LukeJacob2023/nsfw-image-detector`:
         "score": 0.9998371601104736
       }
     ]
+  }
+]
+```
+
+### Video Classification
+
+#### Video with Query Parameters
+
+Optional parameters:
+- `model_name` str
+- `labels` List[str]
+- `score` float
+- `return_on_first_matching_label` bool
+
+`POST` request to the `/api/video-classification` endpoint.
+
+```sh
+curl -X 'POST' \
+  'http://localhost:8000/api/video-classification?model_name=Falconsai%2Fnsfw_image_detection' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@1.mp4;type=video/mp4'
+```
+
+Example returned json array:
+```json
+[
+  {
+    "frame": 1,
+    "label": "nsfw",
+    "score": 0.9998898506164551
   }
 ]
 ```

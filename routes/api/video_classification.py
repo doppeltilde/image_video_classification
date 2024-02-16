@@ -92,7 +92,7 @@ async def video_classification(
     try:
         # Create a temporary file
         with tempfile.NamedTemporaryFile(delete=False) as tf:
-            fc = file.file.read()
+            fc = await file.read()
             tf.write(fc)
 
         if filetype.is_video(tf.name):
