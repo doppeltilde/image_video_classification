@@ -5,5 +5,5 @@ transformers==4.37.2
 torch==2.2.0
 python-dotenv==1.0.1
 filetype==1.2.0
-opencv-python==4.9.0.80
+opencv-python-headless==4.9.0.80
 python-multipart==0.0.9
