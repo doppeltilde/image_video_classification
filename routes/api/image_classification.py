@@ -7,6 +7,7 @@ import io
 from dotenv import load_dotenv
 from typing import List
 from concurrent.futures import ThreadPoolExecutor
+import filetype
 
 router = APIRouter()
 
@@ -26,7 +27,7 @@ def classify_frame(content, i, classifier):
 
 
 @router.post("/api/image-classification")
-async def image_detection(
+async def image_classification(
     file: UploadFile = File(),
     model_name: str = Query(None),
 ):
@@ -43,55 +44,54 @@ async def image_detection(
     try:
         # Read the file as bytes
         contents = await file.read()
-
         # Check if the image is in fact an image
-        try:
+        if filetype.is_image(contents):
             img = Image.open(io.BytesIO(contents))
             img.verify()
-        except IOError:
-            img.close()
-            raise HTTPException(
+
+            # Check if the image is a GIF and if it's animated
+            if img.format.lower() == "gif":
+                try:
+                    results = []
+                    with ThreadPoolExecutor() as executor:
+                        futures = [
+                            executor.submit(classify_frame, contents, i, classifier)
+                            for i in range(img.n_frames)
+                        ]
+                        for future in futures:
+                            result = future.result()
+                            results.append(result)
+                    return results
+                except EOFError:
+                    raise HTTPException(
+                        status_code=400, detail="The uploaded GIF is not animated."
+                    )
+                finally:
+                    img.close()
+
+            # Check Static Image
+            else:
+                try:
+                    # Validate image data
+                    if not isinstance(contents, bytes):
+                        raise ValueError("Invalid image data: not bytes")
+                    # Encode the file to base64
+                    base64Image = base64.b64encode(contents).decode("utf-8")
+
+                    res = classifier(base64Image)
+
+                    return res
+                except (ValueError, IOError) as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Error classifying image: {e}"
+                    )
+                finally:
+                    img.close()
+        else:
+            return HTTPException(
                 status_code=400, detail="The uploaded file is not a valid image."
             )
 
-        # Check if the image is a GIF and if it's animated
-        if img.format.lower() == "gif":
-            try:
-                results = []
-                with ThreadPoolExecutor() as executor:
-                    futures = [
-                        executor.submit(classify_frame, contents, i, classifier)
-                        for i in range(img.n_frames)
-                    ]
-                    for future in futures:
-                        result = future.result()
-                        results.append(result)
-                return results
-            except EOFError:
-                raise HTTPException(
-                    status_code=400, detail="The uploaded GIF is not animated."
-                )
-            finally:
-                img.close()
-
-        # Check Static Image
-        else:
-            try:
-                # Validate image data
-                if not isinstance(contents, bytes):
-                    raise ValueError("Invalid image data: not bytes")
-                # Encode the file to base64
-                base64Image = base64.b64encode(contents).decode("utf-8")
-
-                res = classifier(base64Image)
-
-                return res
-            except (ValueError, IOError) as e:
-                raise HTTPException(
-                    status_code=400, detail=f"Error classifying image: {e}"
-                )
-            finally:
-                img.close()
     except Exception as e:
         img.close()
         print("File is not a valid image.")
@@ -99,7 +99,7 @@ async def image_detection(
 
 
 @router.post("/api/multi-image-classification")
-async def multi_image_detection(
+async def multi_image_classification(
     files: List[UploadFile] = File(), model_name: str = Query(None)
 ):
     _model_name = model_name or default_model_name
@@ -120,50 +120,51 @@ async def multi_image_detection(
             contents = await file.read()
 
             # Check if the image is in fact an image
-            try:
+
+            if filetype.is_image(contents):
                 img = Image.open(io.BytesIO(contents))
                 img.verify()
-            except IOError:
+
+                # Check if the image is a GIF and if it's animated
+                if img.format.lower() == "gif":
+                    try:
+                        results = []
+                        with ThreadPoolExecutor() as executor:
+                            futures = [
+                                executor.submit(classify_frame, contents, i, classifier)
+                                for i in range(img.n_frames)
+                            ]
+                            for future in futures:
+                                result = future.result()
+                                results.append(result)
+                        image_list.append({index: results})
+                    except EOFError:
+                        raise HTTPException(
+                            status_code=400, detail="The uploaded GIF is not animated."
+                        )
+                    finally:
+                        img.close()
+
+                # Check Static Image
+                else:
+                    try:
+                        # Encode the file to base64
+                        base64Image = base64.b64encode(contents).decode("utf-8")
+
+                        res = classifier(base64Image)
+                        image_list.append({index: res})
+
+                    except (ValueError, IOError) as e:
+                        raise HTTPException(
+                            status_code=400, detail=f"Error classifying image: {e}"
+                        )
+                    finally:
+                        img.close()
+            else:
                 img.close()
-                raise HTTPException(
+                return HTTPException(
                     status_code=400, detail="The uploaded file is not a valid image."
                 )
-
-            # Check if the image is a GIF and if it's animated
-            if img.format.lower() == "gif":
-                try:
-                    results = []
-                    with ThreadPoolExecutor() as executor:
-                        futures = [
-                            executor.submit(classify_frame, contents, i, classifier)
-                            for i in range(img.n_frames)
-                        ]
-                        for future in futures:
-                            result = future.result()
-                            results.append(result)
-                    image_list.append({index: results})
-                except EOFError:
-                    raise HTTPException(
-                        status_code=400, detail="The uploaded GIF is not animated."
-                    )
-                finally:
-                    img.close()
-
-            # Check Static Image
-            else:
-                try:
-                    # Encode the file to base64
-                    base64Image = base64.b64encode(contents).decode("utf-8")
-
-                    res = classifier(base64Image)
-                    image_list.append({index: res})
-
-                except (ValueError, IOError) as e:
-                    raise HTTPException(
-                        status_code=400, detail=f"Error classifying image: {e}"
-                    )
-                finally:
-                    img.close()
         except Exception as e:
             print("File is not a valid image.")
             img.close()

@@ -1,12 +1,12 @@
 version: '3.9'
 
 services:
-  image_classification:
-    image: ghcr.io/tiltedcube/image_classification:latest
+  image_video_classification:
+    image: ghcr.io/tiltedcube/image_video_classification:latest
     ports:
       - "8000:8000"
     volumes:
-        - ./models:/app/models:rw
+        - models:/app/models:rw
     environment:
       - DEFAULT_MODEL_NAME
       - ACCESS_TOKEN
