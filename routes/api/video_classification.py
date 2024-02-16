@@ -8,6 +8,7 @@ import base64
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import tempfile
+import filetype
 
 router = APIRouter()
 
@@ -19,14 +20,9 @@ access_token = os.getenv("ACCESS_TOKEN", None)
 default_model_name = os.getenv("DEFAULT_MODEL_NAME", "Falconsai/nsfw_image_detection")
 
 
-def process_video(classifier, file, labels, score, return_on_first_matching_label):
+def process_video(classifier, tf, labels, score, return_on_first_matching_label):
     try:
         results = []
-
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile(delete=False) as tf:
-            file_content = file.file.read()
-            tf.write(file_content)
 
         # Read the video file using OpenCV
         vc = cv2.VideoCapture(tf.name)
@@ -94,17 +90,24 @@ async def video_classification(
         classifier.save_pretrained(model_directory)
 
     try:
-        res = await asyncio.get_event_loop().run_in_executor(
-            executor,
-            process_video,
-            classifier,
-            file,
-            labels,
-            score,
-            return_on_first_matching_label,
-        )
-        print(res)
-        return res
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            fc = file.file.read()
+            tf.write(fc)
+
+        if filetype.is_video(tf.name):
+            res = await asyncio.get_event_loop().run_in_executor(
+                executor,
+                process_video,
+                classifier,
+                tf,
+                labels,
+                score,
+                return_on_first_matching_label,
+            )
+            return res
+        else:
+            return {"error": "file is not a video"}
 
     except Exception as e:
         return {"error": e}
