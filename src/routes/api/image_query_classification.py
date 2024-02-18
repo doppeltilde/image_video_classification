@@ -1,30 +1,33 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query
-from transformers import pipeline
-import os
 import base64
 from PIL import Image
 import io
-from dotenv import load_dotenv
 from typing import List
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from src.shared.shared import check_model, default_score
 
 router = APIRouter()
 
 executor = ThreadPoolExecutor()
 
-load_dotenv()
 
-access_token = os.getenv("ACCESS_TOKEN", None)
-default_model_name = os.getenv("DEFAULT_MODEL_NAME", "Falconsai/nsfw_image_detection")
-default_score = os.getenv("DEFAULT_SCORE", 0.7)
-
-
-def process_image(classifier, contents, labels, score, return_on_first_matching_label):
+def process_image(
+    classifier,
+    contents,
+    labels,
+    score,
+    fast_mode,
+    skip_frames,
+    return_on_first_matching_label,
+):
     results = []
     try:
         img = Image.open(io.BytesIO(contents))
         for frame in range(img.n_frames):
+            if fast_mode and frame % skip_frames != 0:
+                continue
+
             img.seek(frame)
             result = classifier(img)
             label_scores = {i["label"]: i["score"] for i in result}
@@ -59,18 +62,12 @@ async def image_query_classification(
     model_name: str = Query(None),
     labels: List[str] = Query(["nsfw"], explode=True),
     score: float = Query(0.7),
+    fast_mode: bool = Query(False),
+    skip_frames: int = Query(5),
     return_on_first_matching_label: bool = Query(False),
 ):
-    _model_name = model_name or default_model_name
+    classifier = check_model(model_name)
     _score = score or default_score
-    model_directory = f"./models/{_model_name}"
-    classifier = pipeline("image-classification", model=_model_name, token=access_token)
-
-    if not os.path.exists(model_directory):
-        os.makedirs(model_directory, exist_ok=True)
-
-    if not os.listdir(model_directory):
-        classifier.save_pretrained(model_directory)
 
     try:
         # Read the file as bytes
@@ -98,6 +95,8 @@ async def image_query_classification(
                     contents,
                     labels,
                     _score,
+                    fast_mode,
+                    skip_frames,
                     return_on_first_matching_label,
                 )
                 return results
@@ -150,18 +149,12 @@ async def multi_image_query_classification(
     model_name: str = Query(None),
     labels: List[str] = Query(["nsfw"], explode=True),
     score: float = Query(0.7),
+    fast_mode: bool = Query(False),
+    skip_frames: int = Query(5),
     return_on_first_matching_label: bool = Query(False),
 ):
-    _model_name = model_name or default_model_name
+    classifier = check_model(model_name)
     _score = score or default_score
-    model_directory = f"./models/{_model_name}"
-    classifier = pipeline("image-classification", model=_model_name, token=access_token)
-
-    if not os.path.exists(model_directory):
-        os.makedirs(model_directory, exist_ok=True)
-
-    if not os.listdir(model_directory):
-        classifier.save_pretrained(model_directory)
 
     image_list = []
 
@@ -193,6 +186,8 @@ async def multi_image_query_classification(
                         contents,
                         labels_copy,
                         _score,
+                        fast_mode,
+                        skip_frames,
                         return_on_first_matching_label,
                     )
 

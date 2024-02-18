@@ -1,20 +1,13 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query
-from transformers import pipeline
-import os
 import base64
 from PIL import Image
 import io
-from dotenv import load_dotenv
 from typing import List
 from concurrent.futures import ThreadPoolExecutor
 import filetype
+from src.shared.shared import check_storage
 
 router = APIRouter()
-
-load_dotenv()
-
-access_token = os.getenv("ACCESS_TOKEN", None)
-default_model_name = os.getenv("DEFAULT_MODEL_NAME", "Falconsai/nsfw_image_detection")
 
 
 def classify_frame(content, i, classifier):
@@ -31,15 +24,7 @@ async def image_classification(
     file: UploadFile = File(),
     model_name: str = Query(None),
 ):
-    _model_name = model_name or default_model_name
-    model_directory = f"./models/{_model_name}"
-    classifier = pipeline("image-classification", model=_model_name, token=access_token)
-
-    if not os.path.exists(model_directory):
-        os.makedirs(model_directory, exist_ok=True)
-
-    if not os.listdir(model_directory):
-        classifier.save_pretrained(model_directory)
+    classifier = check_storage(model_name)
 
     try:
         # Read the file as bytes
@@ -102,15 +87,7 @@ async def image_classification(
 async def multi_image_classification(
     files: List[UploadFile] = File(), model_name: str = Query(None)
 ):
-    _model_name = model_name or default_model_name
-    model_directory = f"./models/{_model_name}"
-    classifier = pipeline("image-classification", model=_model_name, token=access_token)
-
-    if not os.path.exists(model_directory):
-        os.makedirs(model_directory, exist_ok=True)
-
-    if not os.listdir(model_directory):
-        classifier.save_pretrained(model_directory)
+    classifier = check_storage(model_name)
 
     image_list = []
 

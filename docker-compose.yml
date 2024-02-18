@@ -11,3 +11,6 @@ services:
       - DEFAULT_MODEL_NAME
       - ACCESS_TOKEN
       - DEFAULT_SCORE
+
+volumes:
+  models:

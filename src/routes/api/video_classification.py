@@ -1,7 +1,6 @@
 import cv2
 import os
 from fastapi import APIRouter, UploadFile, File, Query
-from transformers import pipeline
 from dotenv import load_dotenv
 from typing import List
 import base64
@@ -9,6 +8,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import tempfile
 import filetype
+from src.shared.shared import check_model, default_score
 
 router = APIRouter()
 
@@ -16,11 +16,16 @@ executor = ThreadPoolExecutor()
 
 load_dotenv()
 
-access_token = os.getenv("ACCESS_TOKEN", None)
-default_model_name = os.getenv("DEFAULT_MODEL_NAME", "Falconsai/nsfw_image_detection")
 
-
-def process_video(classifier, tf, labels, score, return_on_first_matching_label):
+def process_video(
+    classifier,
+    tf,
+    labels,
+    score,
+    fast_mode,
+    skip_frames,
+    return_on_first_matching_label,
+):
     try:
         results = []
 
@@ -32,8 +37,11 @@ def process_video(classifier, tf, labels, score, return_on_first_matching_label)
             success, frame = vc.read()
             if not success:
                 break
-
             index = int(vc.get(cv2.CAP_PROP_POS_FRAMES))
+
+            if fast_mode and index % skip_frames != 0:
+                continue
+
             _, img = cv2.imencode(".jpg", frame)
 
             base64Image = base64.b64encode(img).decode("utf-8")
@@ -76,18 +84,12 @@ async def video_classification(
     model_name: str = Query(None),
     labels: List[str] = Query(["nsfw"], explode=True),
     score: float = Query(0.7),
+    fast_mode: bool = Query(False),
+    skip_frames: int = Query(5),
     return_on_first_matching_label: bool = Query(False),
 ):
-    _model_name = model_name or default_model_name
-    model_directory = f"./models/{_model_name}"
-
-    classifier = pipeline("image-classification", model=_model_name, token=access_token)
-
-    if not os.path.exists(model_directory):
-        os.makedirs(model_directory, exist_ok=True)
-
-    if not os.listdir(model_directory):
-        classifier.save_pretrained(model_directory)
+    classifier = check_model(model_name)
+    _score = score or default_score
 
     try:
         # Create a temporary file
@@ -102,7 +104,9 @@ async def video_classification(
                 classifier,
                 tf,
                 labels,
-                score,
+                _score,
+                fast_mode,
+                skip_frames,
                 return_on_first_matching_label,
             )
             return res

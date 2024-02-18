@@ -9,6 +9,7 @@
 - For ease of use it's recommended to use the provided [docker-compose.yml](https://github.com/tiltedcube/image_video_classification/blob/main/docker-compose.yml).
 ```yml
 version: '3.9'
+
 services:
   image_video_classification:
     image: ghcr.io/tiltedcube/image_video_classification:latest
@@ -20,6 +21,9 @@ services:
       - DEFAULT_MODEL_NAME
       - ACCESS_TOKEN
       - DEFAULT_SCORE
+
+volumes:
+  models:
 ```
 
 - Rename the `.env.example` file to `.env` and set the preferred values.
@@ -89,9 +93,13 @@ If the standard image classification isn't sufficient or you need a more nuanced
 
 Optional parameters:
 - `model_name` str
+
 - `labels` List[str]
 - `score` float
-- `return_on_first_matching_label` bool
+- `return_on_first_matching_label` bool (default: false)
+
+- `fast_mode` bool (default: false)
+- `skip_frames` int (default: 5)
 
 #### Image with Query Parameters
 `POST` request to the `/api/image-query-classification` endpoint.
@@ -162,9 +170,13 @@ Example returned json array for `LukeJacob2023/nsfw-image-detector`:
 
 Optional parameters:
 - `model_name` str
+
 - `labels` List[str]
 - `score` float
-- `return_on_first_matching_label` bool
+- `return_on_first_matching_label` bool (default: false)
+
+- `fast_mode` bool (default: false)
+- `skip_frames` int (default: 5)
 
 `POST` request to the `/api/video-classification` endpoint.
 
