@@ -5,7 +5,7 @@ import io
 from typing import List
 from concurrent.futures import ThreadPoolExecutor
 import filetype
-from src.shared.shared import check_storage
+from src.shared.shared import check_model
 
 router = APIRouter()
 
@@ -24,7 +24,7 @@ async def image_classification(
     file: UploadFile = File(),
     model_name: str = Query(None),
 ):
-    classifier = check_storage(model_name)
+    classifier = check_model(model_name)
 
     try:
         # Read the file as bytes
@@ -87,7 +87,7 @@ async def image_classification(
 async def multi_image_classification(
     files: List[UploadFile] = File(), model_name: str = Query(None)
 ):
-    classifier = check_storage(model_name)
+    classifier = check_model(model_name)
 
     image_list = []
 
