@@ -23,7 +23,7 @@ def process_video(
     labels,
     score,
     fast_mode,
-    skip_frames,
+    skip_frames_percentage,
     return_on_first_matching_label,
 ):
     try:
@@ -32,6 +32,10 @@ def process_video(
         # Read the video file using OpenCV
         vc = cv2.VideoCapture(tf.name)
 
+        total_frames = int(vc.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        skip_percentage = int(total_frames * (skip_frames_percentage / 100))
+
         # Extract frames from the video
         while True:
             success, frame = vc.read()
@@ -39,7 +43,7 @@ def process_video(
                 break
             index = int(vc.get(cv2.CAP_PROP_POS_FRAMES))
 
-            if fast_mode and index % skip_frames != 0:
+            if fast_mode and index % skip_percentage != 0:
                 continue
 
             _, img = cv2.imencode(".jpg", frame)
@@ -85,7 +89,7 @@ async def video_classification(
     labels: List[str] = Query(["nsfw"], explode=True),
     score: float = Query(0.7),
     fast_mode: bool = Query(False),
-    skip_frames: int = Query(5),
+    skip_frames_percentage: int = Query(5),
     return_on_first_matching_label: bool = Query(False),
 ):
     classifier = check_model(model_name)
@@ -106,7 +110,7 @@ async def video_classification(
                 labels,
                 _score,
                 fast_mode,
-                skip_frames,
+                skip_frames_percentage,
                 return_on_first_matching_label,
             )
             return res

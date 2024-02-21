@@ -18,14 +18,17 @@ def process_image(
     labels,
     score,
     fast_mode,
-    skip_frames,
+    skip_frames_percentage,
     return_on_first_matching_label,
 ):
     results = []
     try:
         img = Image.open(io.BytesIO(contents))
+
+        skip_percentage = int(img.n_frames * (skip_frames_percentage / 100))
+
         for frame in range(img.n_frames):
-            if fast_mode and frame % skip_frames != 0:
+            if fast_mode and frame % skip_percentage != 0:
                 continue
 
             img.seek(frame)
@@ -63,7 +66,7 @@ async def image_query_classification(
     labels: List[str] = Query(["nsfw"], explode=True),
     score: float = Query(0.7),
     fast_mode: bool = Query(False),
-    skip_frames: int = Query(5),
+    skip_frames_percentage: int = Query(5),
     return_on_first_matching_label: bool = Query(False),
 ):
     classifier = check_model(model_name)
@@ -96,7 +99,7 @@ async def image_query_classification(
                     labels,
                     _score,
                     fast_mode,
-                    skip_frames,
+                    skip_frames_percentage,
                     return_on_first_matching_label,
                 )
                 return results
@@ -150,7 +153,7 @@ async def multi_image_query_classification(
     labels: List[str] = Query(["nsfw"], explode=True),
     score: float = Query(0.7),
     fast_mode: bool = Query(False),
-    skip_frames: int = Query(5),
+    skip_frames_percentage: int = Query(5),
     return_on_first_matching_label: bool = Query(False),
 ):
     classifier = check_model(model_name)
@@ -187,7 +190,7 @@ async def multi_image_query_classification(
                         labels_copy,
                         _score,
                         fast_mode,
-                        skip_frames,
+                        skip_frames_percentage,
                         return_on_first_matching_label,
                     )
 
