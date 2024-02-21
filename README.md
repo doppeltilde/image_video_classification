@@ -6,6 +6,7 @@
 - [Docker](https://docker.com)
 
 ## Installation
+
 - For ease of use it's recommended to use the provided [docker-compose.yml](https://github.com/tiltedcube/image_video_classification/blob/main/docker-compose.yml).
 ```yml
 version: '3.9'
@@ -21,6 +22,7 @@ services:
       - DEFAULT_MODEL_NAME
       - ACCESS_TOKEN
       - DEFAULT_SCORE
+    restart: unless-stopped
 
 volumes:
   models:
@@ -38,7 +40,11 @@ Any model designed for image classification should work.
 
 ## Usage
 
-### Interactive API documentation can be found at: http://localhost:8000/docs
+> [!NOTE]
+> Please be aware that the initial classification process may require some time, as the model is being downloaded.
+
+> [!TIP]
+> Interactive API documentation can be found at: http://localhost:8000/docs
 
 ### Image Classification
 `POST` request to the `/api/image-classification` endpoint.
@@ -99,7 +105,7 @@ Optional parameters:
 - `return_on_first_matching_label` bool (default: false)
 
 - `fast_mode` bool (default: false)
-- `skip_frames` int (default: 5)
+- `skip_frames_percentage` int (default: 5)
 
 #### Image with Query Parameters
 `POST` request to the `/api/image-query-classification` endpoint.
@@ -176,7 +182,7 @@ Optional parameters:
 - `return_on_first_matching_label` bool (default: false)
 
 - `fast_mode` bool (default: false)
-- `skip_frames` int (default: 5)
+- `skip_frames_percentage` int (default: 5)
 
 `POST` request to the `/api/video-classification` endpoint.
 

@@ -11,6 +11,7 @@ services:
       - DEFAULT_MODEL_NAME
       - ACCESS_TOKEN
       - DEFAULT_SCORE
+    restart: unless-stopped
 
 volumes:
   models:
