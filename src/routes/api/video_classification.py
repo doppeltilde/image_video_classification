@@ -92,16 +92,16 @@ async def video_classification(
     try:
         totalResults = []
 
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            fc = await file.read()
+            tf.write(fc)
+
         for model_name in model_names:
             classifier = check_model(model_name)
             _score = score or default_score
 
             try:
-                # Create a temporary file
-                with tempfile.NamedTemporaryFile(delete=False) as tf:
-                    fc = await file.read()
-                    tf.write(fc)
-
                 if filetype.is_video(tf.name):
                     res = await asyncio.get_event_loop().run_in_executor(
                         executor,
@@ -114,7 +114,7 @@ async def video_classification(
                         skip_frames_percentage,
                         return_on_first_matching_label,
                     )
-                    totalResults.append(res)
+                    totalResults.append({model_name: res})
                 else:
                     return {"error": "file is not a video"}
 

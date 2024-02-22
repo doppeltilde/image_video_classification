@@ -98,7 +98,7 @@ Example returned json array for `LukeJacob2023/nsfw-image-detector`:
 If the standard image classification isn't sufficient or you need a more nuanced response, there are two endpoints accessible by utilizing query parameters.
 
 Optional parameters:
-- `model_name` str
+- `model_name` List[str]
 
 - `labels` List[str]
 - `score` float
@@ -175,7 +175,7 @@ Example returned json array for `LukeJacob2023/nsfw-image-detector`:
 #### Video with Query Parameters
 
 Optional parameters:
-- `model_name` str
+- `model_name` List[str]
 
 - `labels` List[str]
 - `score` float

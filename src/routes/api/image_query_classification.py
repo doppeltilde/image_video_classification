@@ -93,10 +93,9 @@ async def image_query_classification(
 
                 # Check if the image is a GIF and if it's animated
                 if img.format.lower() == "gif":
-                    results = []
 
                     try:
-                        results = await asyncio.get_event_loop().run_in_executor(
+                        res = await asyncio.get_event_loop().run_in_executor(
                             executor,
                             process_image,
                             classifier,
@@ -107,7 +106,7 @@ async def image_query_classification(
                             skip_frames_percentage,
                             return_on_first_matching_label,
                         )
-                        totalResults.append(results)
+                        totalResults.append({model_name: res})
 
                     except EOFError:
                         raise HTTPException(
@@ -135,7 +134,7 @@ async def image_query_classification(
                                         "score": label_scores[l],
                                     }
                                 )
-                        totalResults.append(results)
+                        totalResults.append({model_name: results})
 
                     except (ValueError, IOError) as e:
                         raise HTTPException(
