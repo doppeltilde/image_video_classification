@@ -51,9 +51,9 @@ def process_video(
             base64Image = base64.b64encode(img).decode("utf-8")
             result = classifier(base64Image)
 
-            label_scores = {i["label"]: i["score"] for i in result}
-
             m = set()
+
+            label_scores = {i["label"]: i["score"] for i in result}
 
             for l in labels[:]:
                 if l in label_scores and label_scores[l] >= score:
@@ -77,45 +77,56 @@ def process_video(
         return results
     except Exception as e:
         return e
-    finally:
-        tf.close()
-        os.remove(tf.name)
 
 
 @router.post("/api/video-classification")
 async def video_classification(
     file: UploadFile = File(),
-    model_name: str = Query(None),
+    model_names: List[str] = Query(["Falconsai/nsfw_image_detection"], explode=True),
+    return_on_first_matching_label: bool = Query(False),
     labels: List[str] = Query(["nsfw"], explode=True),
     score: float = Query(0.7),
     fast_mode: bool = Query(False),
     skip_frames_percentage: int = Query(5),
-    return_on_first_matching_label: bool = Query(False),
 ):
-    classifier = check_model(model_name)
-    _score = score or default_score
-
     try:
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile(delete=False) as tf:
-            fc = await file.read()
-            tf.write(fc)
+        totalResults = []
 
-        if filetype.is_video(tf.name):
-            res = await asyncio.get_event_loop().run_in_executor(
-                executor,
-                process_video,
-                classifier,
-                tf,
-                labels,
-                _score,
-                fast_mode,
-                skip_frames_percentage,
-                return_on_first_matching_label,
-            )
-            return res
-        else:
-            return {"error": "file is not a video"}
+        for model_name in model_names:
+            classifier = check_model(model_name)
+            _score = score or default_score
+
+            try:
+                # Create a temporary file
+                with tempfile.NamedTemporaryFile(delete=False) as tf:
+                    fc = await file.read()
+                    tf.write(fc)
+
+                if filetype.is_video(tf.name):
+                    res = await asyncio.get_event_loop().run_in_executor(
+                        executor,
+                        process_video,
+                        classifier,
+                        tf,
+                        labels,
+                        _score,
+                        fast_mode,
+                        skip_frames_percentage,
+                        return_on_first_matching_label,
+                    )
+                    totalResults.append(res)
+                else:
+                    return {"error": "file is not a video"}
+
+            except Exception as e:
+                return {"error": e}
+
+        return totalResults
 
     except Exception as e:
-        return {"error": e}
+        print("File is not a valid image.")
+        return {"error": str(e)}
+
+    finally:
+        tf.close()
+        os.remove(tf.name)
