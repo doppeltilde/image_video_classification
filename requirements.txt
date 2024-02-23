@@ -1,8 +1,8 @@
 fastapi[standard]==0.109.2
 uvicorn[standard]==0.27.1
 Pillow==10.2.0
-transformers==4.38.0
-torch==2.2.0
+transformers==4.38.1
+torch==2.2.1
 python-dotenv==1.0.1
 filetype==1.2.0
 opencv-python-headless==4.9.0.80
