@@ -29,6 +29,11 @@ volumes:
 ```
 
 - Rename the `.env.example` file to `.env` and set the preferred values.
+```sh
+DEFAULT_MODEL_NAME=Falconsai/nsfw_image_detection
+ACCESS_TOKEN=
+DEFAULT_SCORE=0.7
+```
 
 ## Models
 Any model designed for image classification should work.
@@ -46,7 +51,9 @@ Any model designed for image classification should work.
 > [!TIP]
 > Interactive API documentation can be found at: http://localhost:8000/docs
 
-### Image Classification
+### Simple Classification
+
+#### Image Classification
 `POST` request to the `/api/image-classification` endpoint.
 ```sh
 curl -X 'POST' \
@@ -68,37 +75,11 @@ curl -X 'POST' \
   -F 'files=@1.gif;type=image/gif'
 ```
 
-Example returned json array for `LukeJacob2023/nsfw-image-detector`:
-```json
-[
-      {
-        "score": value,
-        "label": "porn"
-      },
-      {
-        "score": value,
-        "label": "hentai"
-      },
-      {
-        "score": value,
-        "label": "sexy"
-      },
-      {
-        "score": value,
-        "label": "drawings"
-      },
-      {
-        "score": value,
-        "label": "neutral"
-      }
-    ]
-```
-
-### Image Query Classification
-If the standard image classification isn't sufficient or you need a more nuanced response, there are two endpoints accessible by utilizing query parameters.
+### Query Classification
+You can utilize query parameters, if the standard classification isn't sufficient or you need a more nuanced response.
 
 Optional parameters:
-- `model_name` List[str]
+- `model_names` List[str]
 
 - `labels` List[str]
 - `score` float
@@ -107,21 +88,22 @@ Optional parameters:
 - `fast_mode` bool (default: false)
 - `skip_frames_percentage` int (default: 5)
 
-#### Image with Query Parameters
+##### Single Image with Query Parameters
+
 `POST` request to the `/api/image-query-classification` endpoint.
 ```sh
 curl -X 'POST' \
-  'http://localhost:8000/api/image-query-classification?model_name=Falconsai%2Fnsfw_image_detection' \
+  'http://localhost:8000/api/image-query-classification?model_names=Falconsai%2Fnsfw_image_detection' \
   -H 'accept: application/json' \
   -H 'Content-Type: multipart/form-data' \
   -F 'file=@1.jpeg;type=image/jpeg'
 ```
 
-#### Multi Image with Query Parameters
+##### Multi Image with Query Parameters
 `POST` request to the `/api/multi-image-query-classification` endpoint.
 ```sh
 curl -X 'POST' \
-  'http://localhost:8000/api/multi-image-query-classification?model_name=Falconsai%2Fnsfw_image_detection' \
+  'http://localhost:8000/api/multi-image-query-classification?model_names=Falconsai%2Fnsfw_image_detection' \
   -H 'accept: application/json' \
   -H 'Content-Type: multipart/form-data' \
   -F 'files=@1.png;type=image/png' \
@@ -129,81 +111,23 @@ curl -X 'POST' \
   -F 'files=@3.gif;type=image/gif'
 ```
 
-Example returned json array for `LukeJacob2023/nsfw-image-detector`:
-```json
-[
-  {
-    "0": [
-      {
-        "label": "sexy",
-        "score": 0.999847412109375
-      }
-    ]
-  },
-  {
-    "1": [
-      {
-        "label": "porn",
-        "score": 0.9998440742492676
-      }
-    ]
-  },
-  {
-    "2": [
-      {
-        "frame": 0,
-        "label": "porn",
-        "score": 0.999790370464325
-      },
-      {
-        "frame": 174,
-        "label": "hentai",
-        "score": 0.9852345585823059
-      },
-      {
-        "frame": 243,
-        "label": "sexy",
-        "score": 0.9998371601104736
-      }
-    ]
-  }
-]
-```
+#### Video Classification
 
-### Video Classification
-
-#### Video with Query Parameters
-
-Optional parameters:
-- `model_name` List[str]
-
-- `labels` List[str]
-- `score` float
-- `return_on_first_matching_label` bool (default: false)
-
-- `fast_mode` bool (default: false)
-- `skip_frames_percentage` int (default: 5)
+##### Video with Query Parameters
 
 `POST` request to the `/api/video-classification` endpoint.
 
 ```sh
 curl -X 'POST' \
-  'http://localhost:8000/api/video-classification?model_name=Falconsai%2Fnsfw_image_detection' \
+  'http://localhost:8000/api/video-classification?model_names=Falconsai%2Fnsfw_image_detection' \
   -H 'accept: application/json' \
   -H 'Content-Type: multipart/form-data' \
   -F 'file=@1.mp4;type=video/mp4'
 ```
 
-Example returned json array:
-```json
-[
-  {
-    "frame": 1,
-    "label": "nsfw",
-    "score": 0.9998898506164551
-  }
-]
-```
+> [!TIP]
+> You can find code examples in the [`examples`](./examples/) folder.
+
 ---
 
 _Notice:_ _This project was initally created to be used in-house, as such the
