@@ -14,12 +14,15 @@ env:
 permissions:
   contents: read
   packages: write
-  
+   
 jobs:
     build_and_publish:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
 
             - name: Meta
               id: meta
@@ -33,9 +36,11 @@ jobs:
                 username: ${{ env.REGISTRY_USER }}
                 password: ${{ env.REGISTRY_SECRET }}
 
-            - uses: docker/build-push-action@v5
+            - name: Build and push
+              uses: docker/build-push-action@v5
               with:
                 context: .
                 push: ${{ github.event_name != 'pull_request' }}
                 tags: ${{ steps.meta.outputs.tags }}
                 labels: ${{ steps.meta.outputs.labels }}
+                platforms: linux/amd64,linux/arm64
