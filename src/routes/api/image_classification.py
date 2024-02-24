@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Depends
 import base64
 from PIL import Image
 import io
@@ -6,6 +6,7 @@ from typing import List
 from concurrent.futures import ThreadPoolExecutor
 import filetype
 from src.shared.shared import check_model
+from src.middleware.auth.auth import get_api_key
 
 router = APIRouter()
 
@@ -19,11 +20,12 @@ def classify_frame(content, i, classifier):
     return result
 
 
-@router.post("/api/image-classification")
+@router.post("/api/image-classification", dependencies=[Depends(get_api_key)])
 async def image_classification(
     file: UploadFile = File(),
     model_name: str = Query(None),
 ):
+
     classifier = check_model(model_name)
 
     try:
@@ -83,7 +85,7 @@ async def image_classification(
         return {"error": str(e)}
 
 
-@router.post("/api/multi-image-classification")
+@router.post("/api/multi-image-classification", dependencies=[Depends(get_api_key)])
 async def multi_image_classification(
     files: List[UploadFile] = File(), model_name: str = Query(None)
 ):

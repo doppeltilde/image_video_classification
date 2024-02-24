@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 Map<String, String> headers = {
   "Content-Type": 'multipart/form-data',
   "Accept": 'application/json',
+  "X-API-Key": "example",
 };
 
 Map<String, dynamic> queryParamters = {

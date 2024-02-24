@@ -1,6 +1,6 @@
 import cv2
 import os
-from fastapi import APIRouter, UploadFile, File, Query
+from fastapi import APIRouter, UploadFile, File, Query, Depends
 from dotenv import load_dotenv
 from typing import List
 import base64
@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 import tempfile
 import filetype
 from src.shared.shared import check_model, default_score
+from src.middleware.auth.auth import get_api_key
 
 router = APIRouter()
 
@@ -79,7 +80,7 @@ def process_video(
         return e
 
 
-@router.post("/api/video-classification")
+@router.post("/api/video-classification", dependencies=[Depends(get_api_key)])
 async def video_classification(
     file: UploadFile = File(),
     model_names: List[str] = Query(["Falconsai/nsfw_image_detection"], explode=True),

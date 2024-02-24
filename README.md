@@ -22,21 +22,30 @@ services:
       - DEFAULT_MODEL_NAME
       - ACCESS_TOKEN
       - DEFAULT_SCORE
+      - USE_API_KEYS
+      - API_KEYS
     restart: unless-stopped
 
 volumes:
   models:
 ```
 
-- Rename the `.env.example` file to `.env` and set the preferred values.
+- Create a `.env` file and set the preferred values.
 ```sh
 DEFAULT_MODEL_NAME=Falconsai/nsfw_image_detection
-ACCESS_TOKEN=
 DEFAULT_SCORE=0.7
+ACCESS_TOKEN=
+
+# False == Public Access
+# True == Access Only with API Key
+USE_API_KEYS=False
+
+# Comma seperated api keys
+API_KEYS=abc,123,xyz
 ```
 
 ## Models
-Any model designed for image classification should work.
+Any model designed for image classification and compatible with huggingface transformers should work.
 
 ##### Examples
 - https://huggingface.co/Falconsai/nsfw_image_detection

@@ -11,6 +11,8 @@ services:
       - DEFAULT_MODEL_NAME
       - ACCESS_TOKEN
       - DEFAULT_SCORE
+      - USE_API_KEYS
+      - API_KEYS
     restart: unless-stopped
 
 volumes:

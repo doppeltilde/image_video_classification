@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Depends
 import base64
 from PIL import Image
 import io
@@ -6,6 +6,7 @@ from typing import List
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from src.shared.shared import check_model, default_score
+from src.middleware.auth.auth import get_api_key
 
 router = APIRouter()
 
@@ -59,7 +60,7 @@ def process_image(
         return results
 
 
-@router.post("/api/image-query-classification")
+@router.post("/api/image-query-classification", dependencies=[Depends(get_api_key)])
 async def image_query_classification(
     file: UploadFile = File(),
     model_names: List[str] = Query(["Falconsai/nsfw_image_detection"], explode=True),
@@ -154,7 +155,10 @@ async def image_query_classification(
         img.close()
 
 
-@router.post("/api/multi-image-query-classification")
+@router.post(
+    "/api/multi-image-query-classification",
+    dependencies=[Depends(get_api_key)],
+)
 async def multi_image_query_classification(
     model_names: List[str] = Query(["Falconsai/nsfw_image_detection"], explode=True),
     files: List[UploadFile] = File(),
