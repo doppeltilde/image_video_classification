@@ -26,6 +26,4 @@ def check_model(model_name):
         device=device,
     )
 
-    classifier.save_pretrained(f"models/{_model_name}")
-
     return classifier
