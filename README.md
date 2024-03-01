@@ -17,7 +17,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-        - models:/app/models:rw
+      - models:/root/.cache/huggingface/hub:rw
     environment:
       - DEFAULT_MODEL_NAME
       - ACCESS_TOKEN

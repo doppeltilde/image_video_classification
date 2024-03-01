@@ -1,7 +1,6 @@
 import cv2
 import os
 from fastapi import APIRouter, UploadFile, File, Query, Depends
-from dotenv import load_dotenv
 from typing import List
 import base64
 import asyncio
@@ -14,8 +13,6 @@ from src.middleware.auth.auth import get_api_key
 router = APIRouter()
 
 executor = ThreadPoolExecutor()
-
-load_dotenv()
 
 
 def process_video(
