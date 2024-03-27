@@ -7,13 +7,13 @@
 
 ## Installation
 
-- For ease of use it's recommended to use the provided [docker-compose.yml](https://github.com/tiltedcube/image_video_classification/blob/main/docker-compose.yml).
+- For ease of use it's recommended to use the provided [docker-compose.yml](https://github.com/doppeltilde/image_video_classification/blob/main/docker-compose.yml).
 ```yml
 version: '3.9'
 
 services:
   image_video_classification:
-    image: ghcr.io/tiltedcube/image_video_classification:latest
+    image: ghcr.io/doppeltilde/image_video_classification:latest
     ports:
       - "8000:8000"
     volumes:
