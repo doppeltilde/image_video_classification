@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   image_video_classification:
     image: ghcr.io/doppeltilde/image_video_classification:latest

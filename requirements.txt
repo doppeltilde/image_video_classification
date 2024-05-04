@@ -1,8 +1,8 @@
-fastapi[standard]==0.110.0
+fastapi[standard]==0.111.0
 uvicorn[standard]==0.29.0
-Pillow==10.2.0
-transformers==4.39.1
-torch==2.2.1
+Pillow==10.3.0
+transformers==4.40.1
+torch==2.3.0
 python-dotenv==1.0.1
 filetype==1.2.0
 opencv-python-headless==4.9.0.80
