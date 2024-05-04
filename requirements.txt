@@ -1,5 +1,4 @@
 fastapi[standard]==0.111.0
-uvicorn[standard]==0.29.0
 Pillow==10.3.0
 transformers==4.40.1
 torch==2.3.0
