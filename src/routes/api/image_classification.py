@@ -26,7 +26,7 @@ async def image_classification(
     model_name: str = Query(None),
 ):
 
-    classifier = check_model(model_name)
+    onnx_image_classifier = check_model(model_name)
 
     try:
         # Read the file as bytes
@@ -42,7 +42,9 @@ async def image_classification(
                     results = []
                     with ThreadPoolExecutor() as executor:
                         futures = [
-                            executor.submit(classify_frame, contents, i, classifier)
+                            executor.submit(
+                                classify_frame, contents, i, onnx_image_classifier
+                            )
                             for i in range(img.n_frames)
                         ]
                         for future in futures:
@@ -65,7 +67,7 @@ async def image_classification(
                     # Encode the file to base64
                     base64Image = base64.b64encode(contents).decode("utf-8")
 
-                    res = classifier(base64Image)
+                    res = onnx_image_classifier(base64Image)
 
                     return res
                 except (ValueError, IOError) as e:

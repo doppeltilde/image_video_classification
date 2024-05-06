@@ -1,7 +1,15 @@
 from dotenv import load_dotenv
 import os
-from transformers import pipeline
+
+# from transformers import pipeline
+# from transformers import AutoFeatureExtractor
+# from optimum.pipelines import pipeline
+# from optimum.onnxruntime import ORTModelForImageClassification
 import torch
+import requests
+from PIL import Image
+from transformers import AutoFeatureExtractor, pipeline
+from optimum.onnxruntime import ORTModelForImageClassification
 
 load_dotenv()
 
@@ -17,13 +25,30 @@ use_api_keys = os.getenv("USE_API_KEYS", "False").lower() in ["true", "1", "yes"
 
 
 def check_model(model_name):
-    _model_name = model_name or default_model_name
+    _model_name = "AdamCodd/vit-base-nsfw-detector"  # model_name or default_model_name
 
-    classifier = pipeline(
-        "image-classification",
-        model=_model_name,
-        token=access_token,
-        device=device,
+    preprocessor = AutoFeatureExtractor.from_pretrained(_model_name)
+    model = ORTModelForImageClassification.from_pretrained(
+        _model_name,
+        file_name="onnx/model_quantized.onnx",
+    )
+    onnx_image_classifier = pipeline(
+        "image-classification", model=model, feature_extractor=preprocessor
     )
 
-    return classifier
+    return onnx_image_classifier
+
+
+# preprocessor = AutoFeatureExtractor.from_pretrained(_model_name)
+# model = ORTModelForImageClassification.from_pretrained(_model_name, export=True)
+
+# classifier = pipeline(
+#     "image-classification",
+#     model=model,
+#     token=access_token,
+#     device=device,
+#     feature_extractor=preprocessor,
+#     accelerator="ort",
+# )
+
+# return classifier
