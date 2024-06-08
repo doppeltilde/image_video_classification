@@ -17,13 +17,18 @@ use_api_keys = os.getenv("USE_API_KEYS", "False").lower() in ["true", "1", "yes"
 
 
 def check_model(model_name):
-    _model_name = model_name or default_model_name
+    try:
+        _model_name = model_name or default_model_name
 
-    classifier = pipeline(
-        "image-classification",
-        model=_model_name,
-        token=access_token,
-        device=device,
-    )
+        classifier = pipeline(
+            "image-classification",
+            model=_model_name,
+            token=access_token,
+            device=device,
+        )
 
-    return classifier
+        return classifier
+
+    except Exception as e:
+        print(e)
+        return {"error": str(e)}
