@@ -40,8 +40,9 @@ services:
     volumes:
       - models:/root/.cache/huggingface/hub:rw
     environment:
-      - DEFAULT_ASR_MODEL_NAME
-      - COMPUTE_TYPE
+      - DEFAULT_MODEL_NAME
+      - ACCESS_TOKEN
+      - DEFAULT_SCORE
       - USE_API_KEYS
       - API_KEYS
     restart: unless-stopped
