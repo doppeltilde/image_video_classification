@@ -28,6 +28,8 @@ async def image_classification(
 ):
 
     try:
+        classifier = check_model(model_name)
+
         # Read the file as bytes
         contents = await file.read()
         # Check if the image is in fact an image
@@ -38,7 +40,6 @@ async def image_classification(
             # Check if the image is a GIF and if it's animated
             if img.format.lower() == "gif":
                 try:
-                    classifier = check_model(model_name)
 
                     results = []
                     with ThreadPoolExecutor() as executor:
@@ -77,7 +78,7 @@ async def image_classification(
                     )
                 finally:
                     img.close()
-                    del res2
+                    del classifier
                     torch.cuda.empty_cache()
         else:
             return HTTPException(
@@ -103,6 +104,8 @@ async def multi_image_classification(
 
     for index, file in enumerate(files):
         try:
+            classifier = check_model(model_name)
+
             # Read the file as bytes
             contents = await file.read()
 
@@ -115,7 +118,6 @@ async def multi_image_classification(
                 # Check if the image is a GIF and if it's animated
                 if img.format.lower() == "gif":
                     try:
-                        classifier = check_model(model_name)
 
                         results = []
                         with ThreadPoolExecutor() as executor:
@@ -151,7 +153,7 @@ async def multi_image_classification(
                         )
                     finally:
                         img.close()
-                        del res2
+                        del classifier
                         torch.cuda.empty_cache()
 
             else:

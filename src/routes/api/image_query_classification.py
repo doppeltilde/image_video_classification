@@ -82,6 +82,8 @@ async def image_query_classification(
         # Read the file as bytes
         contents = await file.read()
 
+        classifier = check_model(model_name)
+
         for model_name in model_names:
             _score = score or default_score
 
@@ -101,7 +103,6 @@ async def image_query_classification(
                 if img.format.lower() == "gif":
 
                     try:
-                        classifier = check_model(model_name)
 
                         res = await asyncio.get_event_loop().run_in_executor(
                             executor,
@@ -156,7 +157,7 @@ async def image_query_classification(
 
                     finally:
                         img.close()
-                        del res2
+                        del classifier
                         torch.cuda.empty_cache()
 
             except Exception as e:
@@ -198,6 +199,8 @@ async def multi_image_query_classification(
         # Read the file as bytes
         image_list = []
 
+        classifier = check_model(model_name)
+
         for model_name in model_names:
             try:
                 contents = await file.read()
@@ -218,8 +221,6 @@ async def multi_image_query_classification(
                 # Check if the image is a GIF and if it's animated
                 if img.format.lower() == "gif":
                     try:
-                        classifier = check_model(model_name)
-
                         res = await asyncio.get_event_loop().run_in_executor(
                             executor,
                             process_image,
@@ -273,7 +274,7 @@ async def multi_image_query_classification(
                         )
                     finally:
                         img.close()
-                        del res2
+                        del classifier
                         torch.cuda.empty_cache()
 
             except Exception as e:
