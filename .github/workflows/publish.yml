@@ -17,7 +17,7 @@ permissions:
    
 jobs:
     build_and_publish:
-        runs-on: macos-latest
+        runs-on: ubuntu-latest
         strategy:
           matrix:
             include:
