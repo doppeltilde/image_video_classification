@@ -196,10 +196,10 @@ async def multi_image_query_classification(
         # Read the file as bytes
         image_list = []
 
-        classifier = check_model(model_name)
-
         for model_name in model_names:
             try:
+                classifier = check_model(model_name)
+
                 contents = await file.read()
 
                 labels_copy = labels.copy()
