@@ -82,12 +82,12 @@ async def image_query_classification(
         # Read the file as bytes
         contents = await file.read()
 
-        classifier = check_model(model_name)
-
         for model_name in model_names:
             _score = score or default_score
 
             try:
+                classifier = check_model(model_name)
+
                 # Check if the image is in fact an image
                 try:
                     img = Image.open(io.BytesIO(contents))
