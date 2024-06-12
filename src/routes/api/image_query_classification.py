@@ -174,9 +174,6 @@ async def image_query_classification(
         print("File is not a valid image.")
         return {"error": str(e)}
 
-    finally:
-        img.close()
-
 
 @router.post(
     "/api/multi-image-query-classification",
