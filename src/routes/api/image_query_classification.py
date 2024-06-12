@@ -255,15 +255,13 @@ async def multi_image_query_classification(
                         )
                     finally:
                         img.close()
+                        del classifier
+                        torch.cuda.empty_cache()
 
             except Exception as e:
                 print("File is not a valid image.")
                 img.close()
                 return {"error": str(e)}
-
-            finally:
-                del classifier
-                torch.cuda.empty_cache()
 
         totalResults.append({index: image_list})
 
