@@ -20,6 +20,7 @@ services:
       - models:/root/.cache/huggingface/hub:rw
     environment:
       - DEFAULT_MODEL_NAME
+      - BATCH_SIZE
       - ACCESS_TOKEN
       - DEFAULT_SCORE
       - USE_API_KEYS
@@ -41,6 +42,7 @@ services:
       - models:/root/.cache/huggingface/hub:rw
     environment:
       - DEFAULT_MODEL_NAME
+      - BATCH_SIZE
       - ACCESS_TOKEN
       - DEFAULT_SCORE
       - USE_API_KEYS
@@ -61,6 +63,7 @@ volumes:
 - Create a `.env` file and set the preferred values.
 ```sh
 DEFAULT_MODEL_NAME=Falconsai/nsfw_image_detection
+BATCH_SIZE=5
 DEFAULT_SCORE=0.7
 ACCESS_TOKEN=
 

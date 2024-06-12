@@ -9,6 +9,7 @@ import tempfile
 import filetype
 from src.shared.shared import check_model, default_score
 from src.middleware.auth.auth import get_api_key
+import torch
 
 router = APIRouter()
 
@@ -128,3 +129,5 @@ async def video_classification(
     finally:
         tf.close()
         os.remove(tf.name)
+        del classifier
+        torch.cuda.empty_cache()

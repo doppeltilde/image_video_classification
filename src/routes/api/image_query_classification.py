@@ -7,6 +7,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from src.shared.shared import check_model, default_score
 from src.middleware.auth.auth import get_api_key
+import torch
 
 router = APIRouter()
 
@@ -141,9 +142,14 @@ async def image_query_classification(
                         raise HTTPException(
                             status_code=400, detail=f"Error classifying image: {e}"
                         )
+
             except Exception as e:
                 print("File is not a valid image.")
                 return {"error": str(e)}
+
+            finally:
+                del classifier
+                torch.cuda.empty_cache()
 
         return totalResults
 
@@ -216,6 +222,8 @@ async def multi_image_query_classification(
                         )
                     finally:
                         img.close()
+                        del classifier
+                        torch.cuda.empty_cache()
 
                 # Check Static Image
                 else:
@@ -247,10 +255,15 @@ async def multi_image_query_classification(
                         )
                     finally:
                         img.close()
+
             except Exception as e:
                 print("File is not a valid image.")
                 img.close()
                 return {"error": str(e)}
+
+            finally:
+                del classifier
+                torch.cuda.empty_cache()
 
         totalResults.append({index: image_list})
 

@@ -7,6 +7,7 @@ load_dotenv()
 
 access_token = os.getenv("ACCESS_TOKEN", None)
 default_model_name = os.getenv("DEFAULT_MODEL_NAME", "Falconsai/nsfw_image_detection")
+default_batch_size = os.getenv("BATCH_SIZE", 5)
 default_score = os.getenv("DEFAULT_SCORE", 0.7)
 device = 0 if torch.cuda.is_available() else -1
 
@@ -25,6 +26,7 @@ def check_model(model_name):
             model=_model_name,
             token=access_token,
             device=device,
+            batch_size=default_batch_size,
         )
 
         return classifier

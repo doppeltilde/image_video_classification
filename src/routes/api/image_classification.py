@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import filetype
 from src.shared.shared import check_model
 from src.middleware.auth.auth import get_api_key
+import torch
 
 router = APIRouter()
 
@@ -84,6 +85,10 @@ async def image_classification(
         print("File is not a valid image.")
         return {"error": str(e)}
 
+    finally:
+        del classifier
+        torch.cuda.empty_cache()
+
 
 @router.post("/api/multi-image-classification", dependencies=[Depends(get_api_key)])
 async def multi_image_classification(
@@ -139,6 +144,7 @@ async def multi_image_classification(
                         )
                     finally:
                         img.close()
+
             else:
                 img.close()
                 return HTTPException(
@@ -148,5 +154,9 @@ async def multi_image_classification(
             print("File is not a valid image.")
             img.close()
             return {"error": str(e)}
+
+        finally:
+            del classifier
+            torch.cuda.empty_cache()
 
     return image_list
