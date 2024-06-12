@@ -69,13 +69,15 @@ def process_video(
             if return_on_first_matching_label or set(labels) == m:
                 break
 
-        # Release the video capture object
-        vc.release()
-
         # Return the results
         return results
     except Exception as e:
         return e
+
+    finally:
+        vc.release()
+        del result
+        torch.cuda.empty_cache()
 
 
 @router.post("/api/video-classification", dependencies=[Depends(get_api_key)])

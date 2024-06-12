@@ -60,6 +60,11 @@ def process_image(
         print("Error processing image:", str(e))
         return results
 
+    finally:
+        img.close()
+        del result
+        torch.cuda.empty_cache()
+
 
 @router.post("/api/image-query-classification", dependencies=[Depends(get_api_key)])
 async def image_query_classification(
@@ -78,7 +83,6 @@ async def image_query_classification(
         contents = await file.read()
 
         for model_name in model_names:
-            classifier = check_model(model_name)
             _score = score or default_score
 
             try:
@@ -97,6 +101,8 @@ async def image_query_classification(
                 if img.format.lower() == "gif":
 
                     try:
+                        classifier = check_model(model_name)
+
                         res = await asyncio.get_event_loop().run_in_executor(
                             executor,
                             process_image,
@@ -115,6 +121,11 @@ async def image_query_classification(
                             status_code=400, detail="The uploaded GIF is not animated."
                         )
 
+                    finally:
+                        img.close()
+                        del classifier
+                        torch.cuda.empty_cache()
+
                 # Check Static Image
                 else:
                     try:
@@ -125,9 +136,9 @@ async def image_query_classification(
                         # Encode the file to base64
                         base64Image = base64.b64encode(contents).decode("utf-8")
 
-                        res = classifier(base64Image)
+                        res2 = classifier(base64Image)
 
-                        label_scores = {i["label"]: i["score"] for i in res}
+                        label_scores = {i["label"]: i["score"] for i in res2}
                         for l in labels[:]:
                             if l in label_scores and label_scores[l] >= _score:
                                 results.append(
@@ -143,12 +154,17 @@ async def image_query_classification(
                             status_code=400, detail=f"Error classifying image: {e}"
                         )
 
+                    finally:
+                        img.close()
+                        del res2
+                        torch.cuda.empty_cache()
+
             except Exception as e:
                 print("File is not a valid image.")
                 return {"error": str(e)}
 
             finally:
-                del classifier
+                img.close()
                 torch.cuda.empty_cache()
 
         return totalResults
@@ -180,13 +196,13 @@ async def multi_image_query_classification(
 
     for index, file in enumerate(files):
         # Read the file as bytes
-        contents = await file.read()
         image_list = []
 
         for model_name in model_names:
             try:
+                contents = await file.read()
+
                 labels_copy = labels.copy()
-                classifier = check_model(model_name)
 
                 # Check if the image is in fact an image
                 try:
@@ -202,6 +218,8 @@ async def multi_image_query_classification(
                 # Check if the image is a GIF and if it's animated
                 if img.format.lower() == "gif":
                     try:
+                        classifier = check_model(model_name)
+
                         res = await asyncio.get_event_loop().run_in_executor(
                             executor,
                             process_image,
@@ -235,9 +253,9 @@ async def multi_image_query_classification(
                         # Encode the file to base64
                         base64Image = base64.b64encode(contents).decode("utf-8")
 
-                        res = classifier(base64Image)
+                        res2 = classifier(base64Image)
 
-                        label_scores = {i["label"]: i["score"] for i in res}
+                        label_scores = {i["label"]: i["score"] for i in res2}
                         for l in labels[:]:
                             if l in label_scores and label_scores[l] >= _score:
                                 results.append(
@@ -255,13 +273,17 @@ async def multi_image_query_classification(
                         )
                     finally:
                         img.close()
-                        del classifier
+                        del res2
                         torch.cuda.empty_cache()
 
             except Exception as e:
                 print("File is not a valid image.")
                 img.close()
                 return {"error": str(e)}
+
+            finally:
+                img.close()
+                torch.cuda.empty_cache()
 
         totalResults.append({index: image_list})
 

@@ -27,8 +27,6 @@ async def image_classification(
     model_name: str = Query(None),
 ):
 
-    classifier = check_model(model_name)
-
     try:
         # Read the file as bytes
         contents = await file.read()
@@ -40,6 +38,8 @@ async def image_classification(
             # Check if the image is a GIF and if it's animated
             if img.format.lower() == "gif":
                 try:
+                    classifier = check_model(model_name)
+
                     results = []
                     with ThreadPoolExecutor() as executor:
                         futures = [
@@ -56,6 +56,8 @@ async def image_classification(
                     )
                 finally:
                     img.close()
+                    del classifier
+                    torch.cuda.empty_cache()
 
             # Check Static Image
             else:
@@ -66,15 +68,17 @@ async def image_classification(
                     # Encode the file to base64
                     base64Image = base64.b64encode(contents).decode("utf-8")
 
-                    res = classifier(base64Image)
+                    res2 = classifier(base64Image)
 
-                    return res
+                    return res2
                 except (ValueError, IOError) as e:
                     raise HTTPException(
                         status_code=400, detail=f"Error classifying image: {e}"
                     )
                 finally:
                     img.close()
+                    del res2
+                    torch.cuda.empty_cache()
         else:
             return HTTPException(
                 status_code=400, detail="The uploaded file is not a valid image."
@@ -86,7 +90,7 @@ async def image_classification(
         return {"error": str(e)}
 
     finally:
-        del classifier
+        img.close()
         torch.cuda.empty_cache()
 
 
@@ -94,7 +98,6 @@ async def image_classification(
 async def multi_image_classification(
     files: List[UploadFile] = File(), model_name: str = Query(None)
 ):
-    classifier = check_model(model_name)
 
     image_list = []
 
@@ -112,6 +115,8 @@ async def multi_image_classification(
                 # Check if the image is a GIF and if it's animated
                 if img.format.lower() == "gif":
                     try:
+                        classifier = check_model(model_name)
+
                         results = []
                         with ThreadPoolExecutor() as executor:
                             futures = [
@@ -128,6 +133,8 @@ async def multi_image_classification(
                         )
                     finally:
                         img.close()
+                        del classifier
+                        torch.cuda.empty_cache()
 
                 # Check Static Image
                 else:
@@ -135,8 +142,8 @@ async def multi_image_classification(
                         # Encode the file to base64
                         base64Image = base64.b64encode(contents).decode("utf-8")
 
-                        res = classifier(base64Image)
-                        image_list.append({index: res})
+                        res2 = classifier(base64Image)
+                        image_list.append({index: res2})
 
                     except (ValueError, IOError) as e:
                         raise HTTPException(
@@ -144,6 +151,8 @@ async def multi_image_classification(
                         )
                     finally:
                         img.close()
+                        del res2
+                        torch.cuda.empty_cache()
 
             else:
                 img.close()
@@ -156,7 +165,7 @@ async def multi_image_classification(
             return {"error": str(e)}
 
         finally:
-            del classifier
+            img.close()
             torch.cuda.empty_cache()
 
     return image_list
