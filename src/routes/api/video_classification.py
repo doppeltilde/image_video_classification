@@ -122,14 +122,14 @@ async def video_classification(
             except Exception as e:
                 return {"error": e}
 
+            finally:
+                tf.close()
+                os.remove(tf.name)
+                del classifier
+                torch.cuda.empty_cache()
+
         return totalResults
 
     except Exception as e:
         print("File is not a valid image.")
         return {"error": str(e)}
-
-    finally:
-        tf.close()
-        os.remove(tf.name)
-        del classifier
-        torch.cuda.empty_cache()
