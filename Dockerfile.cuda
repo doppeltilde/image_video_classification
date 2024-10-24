@@ -1,8 +1,9 @@
-FROM nvidia/cuda:12.5.0-runtime-ubuntu22.04
+FROM nvidia/cuda:12.6.2-runtime-ubuntu24.04
 WORKDIR /app
 COPY . /app
 RUN apt-get update && \
-    apt-get install -y python3-pip && \
-    pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu121
-CMD ["fastapi", "run", "main.py", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]
+    apt-get install -y python3-pip python3-venv && \
+    python3 -m venv /app/venv && \
+    /app/venv/bin/pip install --upgrade pip && \
+    /app/venv/bin/pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu121
+CMD ["/app/venv/bin/python", "-m", "fastapi", "run", "main.py", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]

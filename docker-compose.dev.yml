@@ -1,0 +1,17 @@
+services:
+  cpu:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/root/.cache/huggingface/hub:rw
+    environment:
+      - DEFAULT_MODEL_NAME
+      - BATCH_SIZE
+      - ACCESS_TOKEN
+      - DEFAULT_SCORE
+      - USE_API_KEYS
+      - API_KEYS
+    restart: unless-stopped

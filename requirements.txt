@@ -1,8 +1,8 @@
-fastapi[standard]==0.112.0
-Pillow==10.4.0
-transformers==4.44.0
-torch==2.4.0
+fastapi[standard]==0.115.3
+Pillow==11.0.0
+transformers==4.46.0
+torch==2.5.0
 python-dotenv==1.0.1
 filetype==1.2.0
 opencv-python-headless==4.10.0.84
-python-multipart==0.0.9
+python-multipart==0.0.12
