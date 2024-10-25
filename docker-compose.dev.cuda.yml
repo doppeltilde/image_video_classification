@@ -1,10 +1,10 @@
 services:
-  cuda:
+  cuda_dev:
     build:
       context: .
       dockerfile: ./Dockerfile.cuda
     ports:
-      - "8000:8000"
+      - "8100:8000"
     volumes:
       - ./models:/root/.cache/huggingface/hub:rw
     environment:
