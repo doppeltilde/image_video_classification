@@ -1,9 +1,21 @@
 FROM nvidia/cuda:12.6.2-base-ubuntu24.04
+
+# Set up working directory
 WORKDIR /app
-COPY . /app
+
+# Install dependencies
 RUN apt-get update && \
-    apt-get install -y python3-pip python3-venv && \
+    apt-get install -y --no-install-recommends python3-pip python3-venv && \
     python3 -m venv /app/venv && \
     /app/venv/bin/pip install --upgrade pip && \
-    /app/venv/bin/pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu124
+    rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for caching
+COPY requirements.txt /app/requirements.txt
+RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu124
+
+# Copy the rest of the application code
+COPY . /app
+
+# Set entrypoint
 CMD ["/app/venv/bin/python", "-m", "fastapi", "run", "main.py", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]
