@@ -1,0 +1,26 @@
+services:
+  opencl_dev:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.opencl
+    ports:
+      - "8200:8000"
+    environment:
+      - DEFAULT_MODEL_NAME
+      - BATCH_SIZE
+      - ACCESS_TOKEN
+      - DEFAULT_SCORE
+      - USE_API_KEYS
+      - API_KEYS
+    restart: unless-stopped
+    devices:
+      - /dev/kfd
+      - /dev/dri
+      - /dev/dri/renderD128 # First GPU
+      # - /dev/dri/renderD129  # Second GPU
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - ./pytorch_ocl:/home/dlprim/pytorch_ocl
+      - ./models:/root/.cache/huggingface/hub:rw
+    ipc: host

@@ -75,6 +75,29 @@ USE_API_KEYS=False
 API_KEYS=abc,123,xyz
 ```
 
+## Tested Devices
+Only tested with consumer grade hardware and only on Linux based systems.
+#### CPU
+- AMD FX-6300
+- Intel Core i5-12400F
+- AMD Ryzen 5 1600
+- AMD Ryzen 5 3600
+- AMD Ryzen 9 5950X
+
+#### NVIDIA GPU (CUDA & OpenCL)
+- GTX 950
+- GTX 960
+- RTX 2070
+- RTX 3060 Ti
+
+#### AMD GPU (OpenCL)
+- Radeon RX 570 4GB
+- Radeon RX 580 8GB
+- Radeon RX 6600 XT 8GB
+
+#### Intel GPU (OpenCL NEO)
+- None
+
 ## Models
 Any model designed for image classification and compatible with huggingface transformers should work.
 
