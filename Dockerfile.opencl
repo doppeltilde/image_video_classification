@@ -1,11 +1,15 @@
 FROM python:3.12.7
 
+# Set environment variables for OpenCL
+ENV OCL_ICD_VENDORS="/etc/OpenCL/vendors"
+ENV OPENCL_VENDOR_PATH="/etc/OpenCL/vendors"
+
 WORKDIR /app
 
 ENV DEBIAN_FRONTEND="noninteractive"
 RUN apt update && \
     apt full-upgrade -y && \
-    apt install python3 python3-dev git build-essential cmake libsqlite3-0 libsqlite3-dev -y && \
+    apt install python3 python3-dev git build-essential cmake libsqlite3-0 libsqlite3-dev ocl-icd-opencl-dev clinfo -y && \
     pip3 install --upgrade pip
 
 COPY requirements.txt /app/requirements.txt
