@@ -13,14 +13,13 @@ services:
       - USE_API_KEYS
       - API_KEYS
     restart: unless-stopped
-    devices:
-      - /dev/kfd
-      - /dev/dri
-      - /dev/dri/renderD128 # First GPU
-      # - /dev/dri/renderD129  # Second GPU
-    security_opt:
-      - seccomp:unconfined
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
     volumes:
-      - ./pytorch_ocl:/home/dlprim/pytorch_ocl
       - ./models:/root/.cache/huggingface/hub:rw
     ipc: host

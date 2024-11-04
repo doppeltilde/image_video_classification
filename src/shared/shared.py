@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 from transformers import pipeline
 import torch
+import pytorch_ocl
 
 load_dotenv()
 
@@ -21,13 +22,25 @@ def check_model(model_name):
     try:
         _model_name = model_name or default_model_name
 
-        classifier = pipeline(
-            "image-classification",
-            model=_model_name,
-            token=access_token,
-            device=device,
-            batch_size=default_batch_size,
-        )
+        try:
+            import pytorch_ocl
+
+            classifier = pipeline(
+                "image-classification",
+                model=_model_name,
+                token=access_token,
+                device="ocl:0",
+                batch_size=default_batch_size,
+            )
+        except ModuleNotFoundError as err:
+            print(err)
+            classifier = pipeline(
+                "image-classification",
+                model=_model_name,
+                token=access_token,
+                device=device,
+                batch_size=default_batch_size,
+            )
 
         return classifier
 
