@@ -22,11 +22,11 @@ jobs:
           matrix:
             include:
               - docker_file: Dockerfile
-                label: "dev"
+                label: "latest"
               - docker_file: Dockerfile.cuda
-                label: "dev-cuda"
+                label: "latest-cuda"
               - docker_file: Dockerfile.opencl.nvidia
-                label: "dev-opencl-nvidia"
+                label: "latest-opencl-nvidia"
 
         steps:
             - uses: actions/checkout@v4
