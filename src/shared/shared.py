@@ -59,4 +59,4 @@ def clear_cache():
         torch.ocl.empty_cache()
     except ModuleNotFoundError as err:
         print(err)
-    torch.cuda.empty_cache()
+        torch.cuda.empty_cache()

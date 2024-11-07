@@ -1,8 +1,8 @@
 services:
-  opencl_dev:
+  opencl_amd_dev:
     build:
       context: .
-      dockerfile: ./Dockerfile.opencl
+      dockerfile: ./Dockerfile.opencl.amd
     ports:
       - "8200:8000"
     environment:
@@ -16,10 +16,12 @@ services:
     devices:
       - /dev/kfd
       - /dev/dri
-      - /dev/dri/renderD128 # First GPU
-      # - /dev/dri/renderD129  # Second GPU
     security_opt:
       - seccomp:unconfined
+    group_add:
+      - "39"
+      - "109"
     volumes:
       - ./models:/root/.cache/huggingface/hub:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix
     ipc: host

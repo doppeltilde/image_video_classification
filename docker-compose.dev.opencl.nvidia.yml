@@ -1,8 +1,8 @@
 services:
-  opencl_dev:
+  opencl_cuda_dev:
     build:
       context: .
-      dockerfile: ./Dockerfile.opencl
+      dockerfile: ./Dockerfile.opencl.nvidia
     ports:
       - "8200:8000"
     environment:

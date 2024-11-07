@@ -1,0 +1,65 @@
+FROM ubuntu:22.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /app
+COPY . /app
+
+RUN apt-get update && apt-get install -y \
+    wget \
+    software-properties-common \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gpg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add AMD GPU repository and install drivers
+RUN wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/rocm.gpg && \
+    echo 'deb [arch=amd64] https://repo.radeon.com/amdgpu/6.2.3/ubuntu jammy main' | tee /etc/apt/sources.list.d/amdgpu.list && \
+    apt-get update && \
+    apt-get install -y amdgpu-install && \
+    amdgpu-install --usecase=graphics,opencl --opencl=rocr,legacy --accept-eula --no-32 -y
+
+# Install OpenCL dependencies
+RUN apt-get update && apt-get install -y \
+    ocl-icd-opencl-dev \
+    opencl-headers \
+    ocl-icd-libopencl1 \
+    clinfo \
+    && rm -rf /var/lib/apt/lists/*
+
+# Configure OpenCL vendors
+RUN mkdir -p /etc/OpenCL/vendors && \
+    echo "libamdocl64.so" > /etc/OpenCL/vendors/amdocl64.icd
+
+# Install Python 3.12
+RUN add-apt-repository ppa:deadsnakes/ppa -y && \
+    apt-get update && \
+    apt-get install -y \
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up Python virtual environment
+RUN python3.12 -m venv /app/venv
+ENV PATH="/app/venv/bin:$PATH"
+RUN pip install --upgrade pip
+
+# Add render and video groups
+RUN groupadd -f render && groupadd -f video
+
+# Set environment variables for OpenCL
+ENV OCL_ICD_VENDORS=/etc/OpenCL/vendors
+
+COPY requirements.txt /app/requirements.txt
+RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
+
+# Install OpenCL backend for PyTorch
+RUN wget https://github.com/artyom-beilis/pytorch_dlprim/releases/download/0.2.0/pytorch_ocl-0.2.0+torch2.5-cp312-none-linux_x86_64.whl && \
+    /app/venv/bin/pip install pytorch_ocl-0.2.0+torch2.5-cp312-none-linux_x86_64.whl && \
+    rm pytorch_ocl-0.2.0+torch2.5-cp312-none-linux_x86_64.whl
+
+CMD ["/app/venv/bin/python", "-m", "fastapi", "run", "main.py", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]

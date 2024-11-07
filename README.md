@@ -86,14 +86,11 @@ Only tested with consumer grade hardware and only on Linux based systems.
 
 #### NVIDIA GPU (CUDA & OpenCL)
 - GTX 950
-- GTX 960
-- RTX 2070
 - RTX 3060 Ti
 
 #### AMD GPU (OpenCL)
-- Radeon RX 570 4GB
-- Radeon RX 580 8GB
-- Radeon RX 6600 XT 8GB
+- RX 580 8GB
+- RX 6600 XT
 
 #### Intel GPU (OpenCL NEO)
 - None
