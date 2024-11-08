@@ -32,6 +32,7 @@ services:
 ### **NVIDIA GPU Support**
 > [!IMPORTANT]
 > Nvidia driver >=560 needs to be installed on the host machine.
+
 **CUDA (AMD64 & ARM64):**
 ```yml
 services:
@@ -85,7 +86,8 @@ services:
 
 ### **AMD GPU Support**
 > [!WARNING]
-> Unless AMD starts to support older Cards again (e.g. gfx803), ROCm will not be available.
+> Unless AMD starts to officially support older Cards again (e.g. gfx803), ROCm will not be available.
+
 **OpenCL (AMD64):**
 ```yml
 services:
@@ -110,8 +112,8 @@ services:
     security_opt:
       - seccomp:unconfined
     group_add:
-      - "39"
-      - "109"
+      - "video"
+      - "render"
 ```
 
 ## Environment Variables
@@ -132,6 +134,7 @@ API_KEYS=abc,123,xyz
 
 ## Tested Devices
 Only tested with consumer grade hardware and only on Linux based systems.
+
 #### CPU
 - AMD FX-6300
 - Intel Core i5-12400F
@@ -243,6 +246,8 @@ curl -X 'POST' \
 > [!TIP]
 > You can find code examples in the [`examples`](./examples/) folder.
 
+> [!IMPORTANT]  
+> Many thanks to Artyom Beilis and company for providing the awesome [OpenCL backend for PyTorch](https://github.com/artyom-beilis/pytorch_dlprim)!
 ---
 
 _Notice:_ _This project was initally created to be used in-house, as such the
