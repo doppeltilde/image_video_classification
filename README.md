@@ -9,7 +9,8 @@
 
 - For ease of use it's recommended to use the provided [docker-compose.yml](https://github.com/doppeltilde/image_video_classification/blob/main/docker-compose.yml).
 
-**CPU Support:** Use the `latest` tag.
+### **CPU Support**
+Use the `latest` tag.
 ```yml
 services:
   image_video_classification:
@@ -17,7 +18,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - models:/root/.cache/huggingface/hub:rw
+      - ./models:/root/.cache/huggingface/hub:rw
     environment:
       - DEFAULT_MODEL_NAME
       - BATCH_SIZE
@@ -26,12 +27,10 @@ services:
       - USE_API_KEYS
       - API_KEYS
     restart: unless-stopped
-
-volumes:
-  models:
 ```
 
-**NVIDIA GPU Support:** Use the `latest-cuda` tag.
+### **NVIDIA GPU Support**
+**CUDA:**
 ```yml
 services:
   image_video_classification_cuda:
@@ -39,7 +38,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - models:/root/.cache/huggingface/hub:rw
+      - ./models:/root/.cache/huggingface/hub:rw
     environment:
       - DEFAULT_MODEL_NAME
       - BATCH_SIZE
@@ -55,9 +54,58 @@ services:
             - driver: nvidia
               count: all
               capabilities: [ gpu ]
+```
+**OpenCL:**
+```yml
+services:
+  image_video_classification_opencl:
+    image: ghcr.io/doppeltilde/image_video_classification:latest-opencl-nvidia
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/root/.cache/huggingface/hub:rw
+    environment:
+      - DEFAULT_MODEL_NAME
+      - BATCH_SIZE
+      - ACCESS_TOKEN
+      - DEFAULT_SCORE
+      - USE_API_KEYS
+      - API_KEYS
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+```
 
-volumes:
-  models:
+### **AMD GPU Support**
+**OpenCL:**
+```yml
+services:
+  image_video_classification_cuda:
+    image: ghcr.io/doppeltilde/image_video_classification:latest-cuda
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/root/.cache/huggingface/hub:rw
+    environment:
+      - DEFAULT_MODEL_NAME
+      - BATCH_SIZE
+      - ACCESS_TOKEN
+      - DEFAULT_SCORE
+      - USE_API_KEYS
+      - API_KEYS
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
 ```
 
 - Create a `.env` file and set the preferred values.
