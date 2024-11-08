@@ -2,6 +2,14 @@ FROM ubuntu:22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+ARG PYTORCH_OCL_VERSION=0.2.0
+ARG TORCH_VERSION=2.5
+ARG PYTHON_VERSION=cp312
+ARG PLATFORM=linux_x86_64
+
+ENV WHL_FILE=pytorch_ocl-${PYTORCH_OCL_VERSION}+torch${TORCH_VERSION}-${PYTHON_VERSION}-none-${PLATFORM}.whl
+ENV WHL_URL=https://github.com/artyom-beilis/pytorch_dlprim/releases/download/${PYTORCH_OCL_VERSION}/${WHL_FILE}
+
 WORKDIR /app
 COPY . /app
 
@@ -58,8 +66,8 @@ COPY requirements.txt /app/requirements.txt
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
 
 # Install OpenCL backend for PyTorch
-RUN wget https://github.com/artyom-beilis/pytorch_dlprim/releases/download/0.2.0/pytorch_ocl-0.2.0+torch2.5-cp312-none-linux_x86_64.whl && \
-    /app/venv/bin/pip install pytorch_ocl-0.2.0+torch2.5-cp312-none-linux_x86_64.whl && \
-    rm pytorch_ocl-0.2.0+torch2.5-cp312-none-linux_x86_64.whl
+RUN wget ${WHL_URL} && \
+    /app/venv/bin/pip install ${WHL_FILE} && \
+    rm ${WHL_FILE}
 
 CMD ["/app/venv/bin/python", "-m", "fastapi", "run", "main.py", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]
