@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
     gpg \
-    && rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/*
 
 # Add AMD GPU repository and install drivers
 RUN apt update && \
