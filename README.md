@@ -86,11 +86,12 @@ services:
 ```yml
 services:
   image_video_classification_cuda:
-    image: ghcr.io/doppeltilde/image_video_classification:latest-cuda
+    image: ghcr.io/doppeltilde/image_video_classification:latest-opencl-amd
     ports:
       - "8000:8000"
     volumes:
       - ./models:/root/.cache/huggingface/hub:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix
     environment:
       - DEFAULT_MODEL_NAME
       - BATCH_SIZE
@@ -99,13 +100,14 @@ services:
       - USE_API_KEYS
       - API_KEYS
     restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [ gpu ]
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    security_opt:
+      - seccomp:unconfined
+    group_add:
+      - "39"
+      - "109"
 ```
 
 - Create a `.env` file and set the preferred values.
