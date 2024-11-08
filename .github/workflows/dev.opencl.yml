@@ -27,8 +27,8 @@ jobs:
             include:
               - docker_file: Dockerfile.opencl.nvidia
                 label: "dev-opencl-nvidia"
-            #   - docker_file: Dockerfile.opencl.amd
-            #     label: "dev-opencl-amd"
+              - docker_file: Dockerfile.opencl.amd
+                label: "dev-opencl-amd"
 
         steps:
             - uses: actions/checkout@v4

@@ -9,7 +9,7 @@
 
 - For ease of use it's recommended to use the provided [docker-compose.yml](https://github.com/doppeltilde/image_video_classification/blob/main/docker-compose.yml).
 
-### **CPU Support**
+### **CPU Support (AMD64 & ARM64)**
 Use the `latest` tag.
 ```yml
 services:
@@ -30,7 +30,9 @@ services:
 ```
 
 ### **NVIDIA GPU Support**
-**CUDA:**
+> [!IMPORTANT]
+> Nvidia driver >=560 needs to be installed on the host machine.
+**CUDA (AMD64 & ARM64):**
 ```yml
 services:
   image_video_classification_cuda:
@@ -55,7 +57,7 @@ services:
               count: all
               capabilities: [ gpu ]
 ```
-**OpenCL:**
+**OpenCL (AMD64):**
 ```yml
 services:
   image_video_classification_opencl:
@@ -82,7 +84,9 @@ services:
 ```
 
 ### **AMD GPU Support**
-**OpenCL:**
+> [!WARNING]
+> Unless AMD starts to support older Cards again (e.g. gfx803), ROCm will not be available.
+**OpenCL (AMD64):**
 ```yml
 services:
   image_video_classification_cuda:
@@ -110,6 +114,7 @@ services:
       - "109"
 ```
 
+## Environment Variables
 - Create a `.env` file and set the preferred values.
 ```sh
 DEFAULT_MODEL_NAME=Falconsai/nsfw_image_detection

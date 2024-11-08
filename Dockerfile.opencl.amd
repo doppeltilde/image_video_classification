@@ -1,6 +1,8 @@
-FROM ubuntu:22.04
+FROM ubuntu:noble
 
 ARG DEBIAN_FRONTEND=noninteractive
+
+USER root
 
 ARG PYTORCH_OCL_VERSION=0.2.0
 ARG TORCH_VERSION=2.4
@@ -13,21 +15,19 @@ ENV WHL_URL=https://github.com/artyom-beilis/pytorch_dlprim/releases/download/${
 WORKDIR /app
 COPY . /app
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && \
+    apt install software-properties-common -y && \
+    add-apt-repository ppa:kisak/kisak-mesa -y && \
+    apt-get update -y && \
+    apt dist-upgrade -y && \
+    apt-get install -y \
     wget \
     software-properties-common \
     apt-transport-https \
     ca-certificates \
     curl \
-    gpg \
+    gpg && \
     rm -rf /var/lib/apt/lists/*
-
-# Add AMD GPU repository and install drivers
-RUN apt update && \
-    wget https://repo.radeon.com/amdgpu-install/6.2.3/ubuntu/jammy/amdgpu-install_6.2.60203-1_all.deb && \
-    apt install ./amdgpu-install_6.2.60203-1_all.deb -y && \
-    amdgpu-install --usecase=graphics,opencl --opencl=rocr,legacy --accept-eula --no-32 -y && \
-    rm ./amdgpu-install_6.2.60203-1_all.deb
 
 # Install OpenCL dependencies
 RUN apt-get update && apt-get install -y \
@@ -35,11 +35,8 @@ RUN apt-get update && apt-get install -y \
     opencl-headers \
     ocl-icd-libopencl1 \
     clinfo \
+    mesa-opencl-icd \
     && rm -rf /var/lib/apt/lists/*
-
-# Configure OpenCL vendors
-RUN mkdir -p /etc/OpenCL/vendors && \
-    echo "libamdocl64.so" > /etc/OpenCL/vendors/amdocl64.icd
 
 # Install Python 3.12
 RUN add-apt-repository ppa:deadsnakes/ppa -y && \
@@ -56,11 +53,32 @@ RUN python3.12 -m venv /app/venv
 ENV PATH="/app/venv/bin:$PATH"
 RUN pip install --upgrade pip
 
-# Add render and video groups
+# Install AMD GPU drivers
+RUN apt update -y && \
+    wget https://repo.radeon.com/amdgpu-install/6.2.3/ubuntu/noble/amdgpu-install_6.2.60203-1_all.deb && \
+    apt install ./amdgpu-install_6.2.60203-1_all.deb -y && \
+    rm -rf ./amdgpu-install_6.2.60203-1_all.deb 
+
+# Configure OpenCL vendors
+RUN mkdir -p /etc/OpenCL/vendors && \
+    dpkg-divert --divert '/etc/OpenCL/vendors/mesa.icd.disabled' --rename '/etc/OpenCL/vendors/mesa.icd' && \
+    echo "libamdocl64.so" > /etc/OpenCL/vendors/amdocl64.icd && \
+    chmod 755 /etc/OpenCL/vendors
+
 RUN groupadd -f render && groupadd -f video
+RUN usermod -a -G render,video root
+
+RUN mkdir -p /dev/dri && \
+    touch /dev/dri/renderD128 && \
+    chmod 666 /dev/dri/renderD128
+
+RUN chmod 666 /dev/dri/render* || true
+RUN chmod 666 /dev/dri/card* || true
 
 # Set environment variables for OpenCL
-ENV OCL_ICD_VENDORS=/etc/OpenCL/vendors
+ENV OCL_ICD_VENDORS="/etc/OpenCL/vendors"
+ENV OPENCL_VENDOR_PATH="/etc/OpenCL/vendors"
+ENV RUSTICL_ENABLE=radeonsi
 
 COPY requirements.txt /app/requirements.txt
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu

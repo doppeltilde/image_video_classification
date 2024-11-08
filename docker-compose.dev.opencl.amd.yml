@@ -19,8 +19,8 @@ services:
     security_opt:
       - seccomp:unconfined
     group_add:
-      - "39"
-      - "109"
+      - "video"
+      - "render"
     volumes:
       - ./models:/root/.cache/huggingface/hub:rw
       - /tmp/.X11-unix:/tmp/.X11-unix
