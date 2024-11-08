@@ -25,8 +25,9 @@ RUN apt-get update && apt-get install -y \
 # Add AMD GPU repository and install drivers
 RUN apt update && \
     wget https://repo.radeon.com/amdgpu-install/6.2.3/ubuntu/jammy/amdgpu-install_6.2.60203-1_all.deb && \
-    apt install ./amdgpu-install_6.2.60203-1_all.deb && \
-    amdgpu-install --usecase=graphics,opencl --opencl=rocr,legacy --accept-eula --no-32 -y
+    apt install ./amdgpu-install_6.2.60203-1_all.deb -y && \
+    amdgpu-install --usecase=graphics,opencl --opencl=rocr,legacy --accept-eula --no-32 -y && \
+    rm ./amdgpu-install_6.2.60203-1_all.deb
 
 # Install OpenCL dependencies
 RUN apt-get update && apt-get install -y \
