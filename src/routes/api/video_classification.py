@@ -7,8 +7,9 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import tempfile
 import filetype
-from src.shared.shared import check_model, default_score, clear_cache
+from src.shared.shared import check_model, default_score
 from src.middleware.auth.auth import get_api_key
+import torch
 
 router = APIRouter()
 
@@ -76,7 +77,7 @@ def process_video(
     finally:
         vc.release()
         del result
-        clear_cache()
+        torch.cuda.empty_cache()
 
 
 @router.post("/api/video-classification", dependencies=[Depends(get_api_key)])
@@ -125,7 +126,7 @@ async def video_classification(
                 tf.close()
                 os.remove(tf.name)
                 del classifier
-                clear_cache()
+                torch.cuda.empty_cache()
 
         return totalResults
 

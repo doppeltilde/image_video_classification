@@ -5,8 +5,9 @@ import io
 from typing import List
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from src.shared.shared import check_model, default_score, clear_cache
+from src.shared.shared import check_model, default_score
 from src.middleware.auth.auth import get_api_key
+import torch
 
 router = APIRouter()
 
@@ -62,7 +63,7 @@ def process_image(
     finally:
         img.close()
         del result
-        clear_cache()
+        torch.cuda.empty_cache()
 
 
 @router.post("/api/image-query-classification", dependencies=[Depends(get_api_key)])
@@ -124,7 +125,7 @@ async def image_query_classification(
                     finally:
                         img.close()
                         del classifier
-                        clear_cache()
+                        torch.cuda.empty_cache()
 
                 # Check Static Image
                 else:
@@ -157,7 +158,7 @@ async def image_query_classification(
                     finally:
                         img.close()
                         del classifier
-                        clear_cache()
+                        torch.cuda.empty_cache()
 
             except Exception as e:
                 print("File is not a valid image.")
@@ -165,7 +166,7 @@ async def image_query_classification(
 
             finally:
                 img.close()
-                clear_cache()
+                torch.cuda.empty_cache()
 
         return totalResults
 
@@ -238,7 +239,7 @@ async def multi_image_query_classification(
                     finally:
                         img.close()
                         del classifier
-                        clear_cache()
+                        torch.cuda.empty_cache()
 
                 # Check Static Image
                 else:
@@ -271,7 +272,7 @@ async def multi_image_query_classification(
                     finally:
                         img.close()
                         del classifier
-                        clear_cache()
+                        torch.cuda.empty_cache()
 
             except Exception as e:
                 print("File is not a valid image.")
@@ -280,7 +281,7 @@ async def multi_image_query_classification(
 
             finally:
                 img.close()
-                clear_cache()
+                torch.cuda.empty_cache()
 
         totalResults.append({index: image_list})
 

@@ -1,4 +1,4 @@
-# Vision Classification for NSFW and SFW media.
+# Image & Video Classification for NSFW and SFW media.
 
 ## Stack:
 - [FastAPI](https://fastapi.tiangolo.com)
@@ -9,8 +9,7 @@
 
 - For ease of use it's recommended to use the provided [docker-compose.yml](https://github.com/doppeltilde/image_video_classification/blob/main/docker-compose.yml).
 
-### **CPU Support (AMD64 & ARM64)**
-Use the `latest` tag.
+**CPU Support:** Use the `latest` tag.
 ```yml
 services:
   image_video_classification:
@@ -18,7 +17,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./models:/root/.cache/huggingface/hub:rw
+      - models:/root/.cache/huggingface/hub:rw
     environment:
       - DEFAULT_MODEL_NAME
       - BATCH_SIZE
@@ -27,13 +26,12 @@ services:
       - USE_API_KEYS
       - API_KEYS
     restart: unless-stopped
+
+volumes:
+  models:
 ```
 
-### **NVIDIA GPU Support**
-> [!IMPORTANT]
-> Nvidia driver >=560 needs to be installed on the host machine.
-
-**CUDA (AMD64 & ARM64):**
+**NVIDIA GPU Support:** Use the `latest-cuda` tag.
 ```yml
 services:
   image_video_classification_cuda:
@@ -41,7 +39,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./models:/root/.cache/huggingface/hub:rw
+      - models:/root/.cache/huggingface/hub:rw
     environment:
       - DEFAULT_MODEL_NAME
       - BATCH_SIZE
@@ -57,96 +55,11 @@ services:
             - driver: nvidia
               count: all
               capabilities: [ gpu ]
-```
-**OpenCL (AMD64):**
-```yml
-services:
-  image_video_classification_opencl:
-    image: ghcr.io/doppeltilde/image_video_classification:latest-opencl-nvidia
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./models:/root/.cache/huggingface/hub:rw
-    environment:
-      - DEFAULT_MODEL_NAME
-      - BATCH_SIZE
-      - ACCESS_TOKEN
-      - DEFAULT_SCORE
-      - USE_API_KEYS
-      - API_KEYS
-    restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [ gpu ]
+
+volumes:
+  models:
 ```
 
-### **AMD GPU Support**
-> [!WARNING]
-> Unless AMD starts to officially support older Cards again (e.g. gfx8), ROCm will not be available.
-
-**OpenCL Rusticl (AMD64):**
-> [!CAUTION]
-> While Rusticl works on Polaris cards, there are significant differences in inference performance, with Polaris cards running Clover showing higher accuracy.
-
-```yml
-services:
-  image_video_classification_cuda:
-    image: ghcr.io/doppeltilde/image_video_classification:latest-opencl-amd-rusticl
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./models:/root/.cache/huggingface/hub:rw
-      - /tmp/.X11-unix:/tmp/.X11-unix
-    environment:
-      - DEFAULT_MODEL_NAME
-      - BATCH_SIZE
-      - ACCESS_TOKEN
-      - DEFAULT_SCORE
-      - USE_API_KEYS
-      - API_KEYS
-    restart: unless-stopped
-    devices:
-      - /dev/kfd
-      - /dev/dri
-    security_opt:
-      - seccomp:unconfined
-    group_add:
-      - "video"
-      - "render"
-```
-**OpenCL Clover (AMD64):**
-```yml
-services:
-  image_video_classification_cuda:
-    image: ghcr.io/doppeltilde/image_video_classification:latest-opencl-amd-clover
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./models:/root/.cache/huggingface/hub:rw
-      - /tmp/.X11-unix:/tmp/.X11-unix
-    environment:
-      - DEFAULT_MODEL_NAME
-      - BATCH_SIZE
-      - ACCESS_TOKEN
-      - DEFAULT_SCORE
-      - USE_API_KEYS
-      - API_KEYS
-    restart: unless-stopped
-    devices:
-      - /dev/kfd
-      - /dev/dri
-    security_opt:
-      - seccomp:unconfined
-    group_add:
-      - "video"
-      - "render"
-```
-
-## Environment Variables
 - Create a `.env` file and set the preferred values.
 ```sh
 DEFAULT_MODEL_NAME=Falconsai/nsfw_image_detection
@@ -161,28 +74,6 @@ USE_API_KEYS=False
 # Comma seperated api keys
 API_KEYS=abc,123,xyz
 ```
-
-## Tested Devices
-Only tested with consumer grade hardware and only on Linux based systems.
-
-#### CPU
-- AMD FX-6300
-- Intel Core i5-12400F
-- AMD Ryzen 5 1600
-- AMD Ryzen 5 3600
-- AMD Ryzen 9 5950X
-
-#### NVIDIA GPU (CUDA & OpenCL)
-- GTX 950
-- RTX 3060 Ti
-
-#### AMD GPU (OpenCL)
-- RX 570 4GB
-- RX 580 8GB
-- RX 6600 XT
-
-#### Intel GPU (OpenCL NEO)
-- None
 
 ## Models
 Any model designed for image classification and compatible with huggingface transformers should work.
@@ -277,8 +168,6 @@ curl -X 'POST' \
 > [!TIP]
 > You can find code examples in the [`examples`](./examples/) folder.
 
-> [!IMPORTANT]  
-> Many thanks to Artyom Beilis and company for providing the awesome [OpenCL backend for PyTorch](https://github.com/artyom-beilis/pytorch_dlprim)!
 ---
 
 _Notice:_ _This project was initally created to be used in-house, as such the
