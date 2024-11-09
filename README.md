@@ -90,7 +90,7 @@ services:
 
 **OpenCL Rusticl (AMD64):**
 > [!CAUTION]
-> While Rusticl is compatible with Polaris, there are significant differences in inference performance, with Polaris cards running Clover showing higher accuracy.
+> While Rusticl works on Polaris cards, there are significant differences in inference performance, with Polaris cards running Clover showing higher accuracy.
 
 ```yml
 services:
@@ -177,6 +177,7 @@ Only tested with consumer grade hardware and only on Linux based systems.
 - RTX 3060 Ti
 
 #### AMD GPU (OpenCL)
+- RX 570 4GB
 - RX 580 8GB
 - RX 6600 XT
 
