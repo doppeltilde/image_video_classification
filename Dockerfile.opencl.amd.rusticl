@@ -79,6 +79,7 @@ RUN chmod 666 /dev/dri/card* || true
 ENV OCL_ICD_VENDORS="/etc/OpenCL/vendors"
 ENV OPENCL_VENDOR_PATH="/etc/OpenCL/vendors"
 ENV RUSTICL_ENABLE=radeonsi
+ENV RUSTICL_FEATURES="f16,f64"
 
 COPY requirements.txt /app/requirements.txt
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
