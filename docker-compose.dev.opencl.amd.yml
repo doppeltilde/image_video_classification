@@ -2,7 +2,7 @@ services:
   opencl_amd_dev:
     build:
       context: .
-      dockerfile: ./Dockerfile.opencl.amd
+      dockerfile: ./Dockerfile.opencl.amd.rusticl
     ports:
       - "8200:8000"
     environment:

@@ -86,13 +86,43 @@ services:
 
 ### **AMD GPU Support**
 > [!WARNING]
-> Unless AMD starts to officially support older Cards again (e.g. gfx803), ROCm will not be available.
+> Unless AMD starts to officially support older Cards again (e.g. gfx8), ROCm will not be available.
 
-**OpenCL (AMD64):**
+**OpenCL Rusticl (AMD64):**
+> [!CAUTION]
+> While Rusticl is compatible with Polaris, there are significant differences in inference performance, with Polaris cards running Clover showing higher accuracy.
+
 ```yml
 services:
   image_video_classification_cuda:
-    image: ghcr.io/doppeltilde/image_video_classification:latest-opencl-amd
+    image: ghcr.io/doppeltilde/image_video_classification:latest-opencl-amd-rusticl
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/root/.cache/huggingface/hub:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - DEFAULT_MODEL_NAME
+      - BATCH_SIZE
+      - ACCESS_TOKEN
+      - DEFAULT_SCORE
+      - USE_API_KEYS
+      - API_KEYS
+    restart: unless-stopped
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    security_opt:
+      - seccomp:unconfined
+    group_add:
+      - "video"
+      - "render"
+```
+**OpenCL Clover (AMD64):**
+```yml
+services:
+  image_video_classification_cuda:
+    image: ghcr.io/doppeltilde/image_video_classification:latest-opencl-amd-clover
     ports:
       - "8000:8000"
     volumes:
