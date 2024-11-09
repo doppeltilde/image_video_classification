@@ -1,11 +1,13 @@
-name: Production CI/CD
+name: OpenCL Dev CI/CD
 
 on:
   push:
-    tags:
-      - 'v*'
     branches:
-      - "main"
+        - "opencl"
+        - "dev"
+        - "cuda"
+        - "cpu"
+        - "beta"
     
 env:
   REGISTRY: "ghcr.io"
@@ -23,18 +25,15 @@ jobs:
         strategy:
           matrix:
             include:
-              - docker_file: Dockerfile
-                label: "latest"
-              - docker_file: Dockerfile.cuda
-                label: "latest-cuda"
               - docker_file: Dockerfile.opencl.nvidia
-                label: "latest-opencl-nvidia"
+                label: "dev-opencl-nvidia"
+              - docker_file: Dockerfile.opencl.amd.rusticl
+                label: "dev-opencl-amd-rusticl"
+              - docker_file: Dockerfile.opencl.amd.clover
+                label: "dev-opencl-amd-clover"
 
         steps:
             - uses: actions/checkout@v4
-
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
 
             - name: Meta
               id: meta
@@ -65,4 +64,4 @@ jobs:
                   ${{ steps.meta.outputs.tags }}
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.label }}
                 labels: ${{ steps.meta.outputs.labels }}
-                platforms: linux/amd64,linux/arm64
+                platforms: linux/amd64

@@ -1,0 +1,27 @@
+services:
+  opencl_amd_dev:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.opencl.amd.rusticl
+    ports:
+      - "8200:8000"
+    environment:
+      - DEFAULT_MODEL_NAME
+      - BATCH_SIZE
+      - ACCESS_TOKEN
+      - DEFAULT_SCORE
+      - USE_API_KEYS
+      - API_KEYS
+    restart: unless-stopped
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    security_opt:
+      - seccomp:unconfined
+    group_add:
+      - "video"
+      - "render"
+    volumes:
+      - ./models:/root/.cache/huggingface/hub:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    ipc: host

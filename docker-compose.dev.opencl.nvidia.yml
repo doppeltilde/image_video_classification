@@ -1,0 +1,25 @@
+services:
+  opencl_cuda_dev:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.opencl.nvidia
+    ports:
+      - "8200:8000"
+    environment:
+      - DEFAULT_MODEL_NAME
+      - BATCH_SIZE
+      - ACCESS_TOKEN
+      - DEFAULT_SCORE
+      - USE_API_KEYS
+      - API_KEYS
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    volumes:
+      - ./models:/root/.cache/huggingface/hub:rw
+    ipc: host

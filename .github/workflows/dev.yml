@@ -1,11 +1,13 @@
-name: Production CI/CD
+name: CPU/CUDA Dev CI/CD
 
 on:
   push:
-    tags:
-      - 'v*'
     branches:
-      - "main"
+        - "opencl"
+        - "dev"
+        - "cuda"
+        - "cpu"
+        - "beta"
     
 env:
   REGISTRY: "ghcr.io"
@@ -24,11 +26,9 @@ jobs:
           matrix:
             include:
               - docker_file: Dockerfile
-                label: "latest"
+                label: "dev-cpu"
               - docker_file: Dockerfile.cuda
-                label: "latest-cuda"
-              - docker_file: Dockerfile.opencl.nvidia
-                label: "latest-opencl-nvidia"
+                label: "dev-cuda"
 
         steps:
             - uses: actions/checkout@v4
@@ -65,4 +65,4 @@ jobs:
                   ${{ steps.meta.outputs.tags }}
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.label }}
                 labels: ${{ steps.meta.outputs.labels }}
-                platforms: linux/amd64,linux/arm64
+                platforms: linux/amd64, linux/arm64
