@@ -1,4 +1,4 @@
-# Image & Video Classification for NSFW and SFW media.
+# Vision Classification for NSFW and SFW media.
 
 ## Stack:
 - [FastAPI](https://fastapi.tiangolo.com)
